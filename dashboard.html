@@ -1,0 +1,2706 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="default" data-lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>冲压车间油液智能监测平台</title>
+<style>
+/* ============================================================
+   CSS VARIABLES & THEMES
+   ============================================================ */
+:root {
+  --bg-deep: #0c1220;
+  --bg-primary: #111a2e;
+  --bg-secondary: #162040;
+  --bg-card: rgba(18, 28, 52, 0.7);
+  --bg-glass: rgba(255,255,255,0.04);
+  --text-primary: #e8ecf4;
+  --text-secondary: #7b8db5;
+  --text-dim: #3d5280;
+  --accent: #00d4ff;
+  --accent2: #6366f1;
+  --accent-dim: rgba(0, 212, 255, 0.1);
+  --accent-glow: rgba(0, 212, 255, 0.35);
+  --danger: #ff3b5c;
+  --warning: #ffaa00;
+  --success: #00e676;
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(0, 212, 255, 0.25);
+  --shadow: 0 8px 32px rgba(0,0,0,0.3);
+  --shadow-accent: 0 0 40px rgba(0, 212, 255, 0.1);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+  --font-main: -apple-system, 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
+  --oil-color: rgba(0, 180, 220, 0.35);
+  --oil-color2: rgba(0, 140, 200, 0.18);
+  --boil-color: rgba(255, 100, 50, 0.6);
+  --steam-color: rgba(255,255,255,0.15);
+  --nav-height: 60px;
+  --page-padding: 24px;
+  --orb1: rgba(0, 212, 255, 0.08);
+  --orb2: rgba(99, 102, 241, 0.06);
+  --orb3: rgba(0, 230, 118, 0.04);
+  --grid-color: rgba(0, 212, 255, 0.03);
+}
+
+[data-theme="cyberpunk"] {
+  --bg-deep: #0f0520; --bg-primary: #180a35; --bg-secondary: #20104a;
+  --bg-card: rgba(25, 10, 60, 0.7); --accent: #ff00e5; --accent2: #ffdd00;
+  --accent-dim: rgba(255,0,229,0.1); --accent-glow: rgba(255,0,229,0.35);
+  --border-accent: rgba(255,0,229,0.25); --shadow-accent: 0 0 40px rgba(255,0,229,0.12);
+  --oil-color: rgba(200,0,220,0.3); --oil-color2: rgba(150,0,180,0.15);
+  --boil-color: rgba(255,50,100,0.6);
+  --orb1: rgba(255,0,229,0.08); --orb2: rgba(255,221,0,0.05); --orb3: rgba(180,0,255,0.04);
+  --grid-color: rgba(255,0,229,0.03);
+}
+[data-theme="matrix"] {
+  --bg-deep: #030d03; --bg-primary: #071a07; --bg-secondary: #0c280c;
+  --bg-card: rgba(8, 30, 8, 0.7); --accent: #00ff41; --accent2: #88ff00;
+  --accent-dim: rgba(0,255,65,0.08); --accent-glow: rgba(0,255,65,0.3);
+  --border-accent: rgba(0,255,65,0.2); --shadow-accent: 0 0 40px rgba(0,255,65,0.08);
+  --oil-color: rgba(0,200,50,0.25); --oil-color2: rgba(0,150,30,0.12);
+  --boil-color: rgba(0,255,80,0.5);
+  --orb1: rgba(0,255,65,0.06); --orb2: rgba(136,255,0,0.04); --orb3: rgba(0,200,50,0.03);
+  --grid-color: rgba(0,255,65,0.025);
+}
+[data-theme="deepblue"] {
+  --bg-deep: #040c1e; --bg-primary: #0a1838; --bg-secondary: #102450;
+  --bg-card: rgba(10, 25, 55, 0.7); --accent: #4488ff; --accent2: #00bbff;
+  --accent-dim: rgba(68,136,255,0.1); --accent-glow: rgba(68,136,255,0.3);
+  --border-accent: rgba(68,136,255,0.25); --shadow-accent: 0 0 40px rgba(68,136,255,0.1);
+  --oil-color: rgba(40,100,220,0.3); --oil-color2: rgba(30,70,180,0.15);
+  --boil-color: rgba(60,120,255,0.5);
+  --orb1: rgba(68,136,255,0.08); --orb2: rgba(0,187,255,0.05); --orb3: rgba(40,80,200,0.04);
+  --grid-color: rgba(68,136,255,0.03);
+}
+[data-theme="flame"] {
+  --bg-deep: #140800; --bg-primary: #201005; --bg-secondary: #301808;
+  --bg-card: rgba(40, 18, 5, 0.7); --accent: #ff6600; --accent2: #ff2200;
+  --accent-dim: rgba(255,102,0,0.1); --accent-glow: rgba(255,102,0,0.35);
+  --border-accent: rgba(255,102,0,0.25); --shadow-accent: 0 0 40px rgba(255,102,0,0.1);
+  --oil-color: rgba(220,80,0,0.3); --oil-color2: rgba(180,60,0,0.15);
+  --boil-color: rgba(255,80,0,0.7);
+  --orb1: rgba(255,102,0,0.07); --orb2: rgba(255,34,0,0.05); --orb3: rgba(255,180,0,0.04);
+  --grid-color: rgba(255,102,0,0.025);
+}
+[data-theme="aurora"] {
+  --bg-deep: #041410; --bg-primary: #082820; --bg-secondary: #0c3830;
+  --bg-card: rgba(8, 45, 35, 0.7); --accent: #00e676; --accent2: #00bcd4;
+  --accent-dim: rgba(0,230,118,0.08); --accent-glow: rgba(0,230,118,0.3);
+  --border-accent: rgba(0,230,118,0.2); --shadow-accent: 0 0 40px rgba(0,230,118,0.08);
+  --oil-color: rgba(0,200,100,0.25); --oil-color2: rgba(0,160,80,0.12);
+  --boil-color: rgba(0,230,120,0.5);
+  --orb1: rgba(0,230,118,0.06); --orb2: rgba(0,188,212,0.05); --orb3: rgba(100,255,180,0.03);
+  --grid-color: rgba(0,230,118,0.025);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   BACKGROUND EFFECTS - Rich layered system
+   ============================================================ */
+#bgCanvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+/* Gradient mesh background */
+.bg-gradient-mesh {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, var(--orb1), transparent),
+    radial-gradient(ellipse 60% 80% at 90% 80%, var(--orb2), transparent),
+    radial-gradient(ellipse 70% 50% at 50% 50%, var(--orb3), transparent),
+    linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-primary) 50%, var(--bg-deep) 100%);
+  transition: all 1s ease;
+}
+
+/* Floating orbs */
+.bg-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(80px);
+  animation: orbFloat 20s ease-in-out infinite;
+}
+.bg-orb-1 {
+  width: 500px; height: 500px; top: -10%; left: -5%;
+  background: var(--orb1);
+  animation-duration: 25s;
+}
+.bg-orb-2 {
+  width: 400px; height: 400px; bottom: -10%; right: -5%;
+  background: var(--orb2);
+  animation-duration: 30s; animation-delay: -5s;
+}
+.bg-orb-3 {
+  width: 300px; height: 300px; top: 40%; left: 60%;
+  background: var(--orb3);
+  animation-duration: 22s; animation-delay: -10s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(40px, 30px) scale(1.05); }
+}
+
+/* Subtle grid overlay */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%);
+}
+
+/* Scanline overlay */
+.scanline-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.012) 3px, rgba(0,0,0,0.012) 6px);
+}
+
+/* Vignette */
+.vignette {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%);
+}
+
+/* ============================================================
+   PAGE SYSTEM
+   ============================================================ */
+.page {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 2; overflow-y: auto; overflow-x: hidden;
+  padding: var(--nav-height) 0 80px 0;
+  opacity: 0; transform: translateY(20px) scale(0.99);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.page.active {
+  opacity: 1; transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--page-padding);
+}
+
+/* ============================================================
+   TOP NAVIGATION
+   ============================================================ */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--nav-height);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: linear-gradient(180deg, rgba(12,18,32,0.92) 0%, rgba(12,18,32,0.8) 100%);
+  backdrop-filter: blur(30px) saturate(1.6);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+/* Nav bottom glow line */
+.top-nav::after {
+  content: ''; position: absolute; bottom: -1px; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0.5;
+  animation: navGlow 4s ease-in-out infinite;
+}
+@keyframes navGlow {
+  0%, 100% { opacity: 0.3; left: 10%; right: 10%; }
+  50% { opacity: 0.7; left: 5%; right: 5%; }
+}
+
+.nav-brand { display: flex; align-items: center; gap: 12px; }
+.nav-logo {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px solid var(--border-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; position: relative;
+  box-shadow: 0 0 20px var(--accent-dim);
+  animation: logoPulse 3s ease-in-out infinite;
+}
+/* Logo ring animation */
+.nav-logo::before {
+  content: ''; position: absolute; inset: -3px;
+  border-radius: 12px; border: 1px solid transparent;
+  background: linear-gradient(135deg, var(--accent), transparent, var(--accent2)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: logoRingSpin 6s linear infinite;
+  opacity: 0.6;
+}
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 0 20px var(--accent-dim); }
+  50% { box-shadow: 0 0 35px var(--accent-glow); }
+}
+@keyframes logoRingSpin {
+  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+}
+
+.nav-title {
+  font-size: 16px; font-weight: 700; letter-spacing: 1px;
+  background: linear-gradient(135deg, var(--accent), var(--text-primary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.nav-subtitle {
+  font-size: 10px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;
+}
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-time {
+  font-family: var(--font-mono);
+  font-size: 13px; color: var(--text-secondary);
+}
+.nav-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.nav-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.nav-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 15px var(--accent-dim);
+}
+.nav-btn:hover::before { opacity: 1; }
+
+.status-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid;
+  transition: all 0.3s;
+  position: relative;
+}
+.status-pill.normal { color: var(--success); border-color: rgba(0,230,118,0.25); background: rgba(0,230,118,0.08); }
+.status-pill.warning { color: var(--warning); border-color: rgba(255,170,0,0.25); background: rgba(255,170,0,0.08); }
+.status-pill.critical { color: var(--danger); border-color: rgba(255,59,92,0.25); background: rgba(255,59,92,0.08); }
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  animation: dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+
+/* ============================================================
+   BOTTOM TAB BAR
+   ============================================================ */
+.tab-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 64px; z-index: 100;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 24px;
+  background: linear-gradient(0deg, rgba(12,18,32,0.95) 0%, rgba(12,18,32,0.85) 100%);
+  backdrop-filter: blur(30px) saturate(1.6);
+  border-top: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.tab-bar::before {
+  content: ''; position: absolute; top: -1px; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0.4;
+}
+.tab-item {
+  flex: 1; max-width: 120px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 12px; border-radius: 12px;
+  cursor: pointer; transition: all 0.3s;
+  color: var(--text-dim);
+  border: 1px solid transparent;
+  position: relative;
+}
+.tab-item:hover { color: var(--text-secondary); background: var(--bg-glass); }
+.tab-item.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--border-accent);
+}
+/* Active tab glow dot */
+.tab-item.active::after {
+  content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 3px; border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+.tab-icon { font-size: 20px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.section-line {
+  width: 3px; height: 20px;
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--accent-dim);
+}
+.section-title {
+  font-size: 15px; font-weight: 700; letter-spacing: 1px;
+}
+.section-sub {
+  font-size: 11px; color: var(--text-dim); margin-left: auto;
+}
+
+/* ============================================================
+   OIL CARD (with sloshing liquid animation)
+   ============================================================ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.oil-card {
+  position: relative;
+  height: 185px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+}
+/* Animated gradient border */
+.oil-card::before {
+  content: ''; position: absolute; inset: -1px;
+  border-radius: var(--radius);
+  background: linear-gradient(var(--card-border-angle, 0deg), var(--accent), transparent 40%, transparent 60%, var(--accent2));
+  z-index: -1; opacity: 0;
+  transition: opacity 0.4s;
+}
+.oil-card:hover::before {
+  opacity: 0.6;
+  animation: borderRotate 3s linear infinite;
+}
+@keyframes borderRotate {
+  from { --card-border-angle: 0deg; } to { --card-border-angle: 360deg; }
+}
+@property --card-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.oil-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.25) 100%);
+  z-index: 3; pointer-events: none;
+}
+.oil-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: var(--shadow-accent), var(--shadow), 0 0 60px var(--accent-dim);
+  border-color: var(--border-accent);
+}
+
+/* Corner decorations */
+.corner-deco {
+  position: absolute; z-index: 5; pointer-events: none;
+  width: 12px; height: 12px;
+  opacity: 0; transition: opacity 0.4s;
+}
+.oil-card:hover .corner-deco { opacity: 1; }
+.corner-deco.tl { top: 6px; left: 6px; border-top: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
+.corner-deco.tr { top: 6px; right: 6px; border-top: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
+.corner-deco.bl { bottom: 6px; left: 6px; border-bottom: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
+.corner-deco.br { bottom: 6px; right: 6px; border-bottom: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
+
+/* Oil liquid container */
+.oil-liquid {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 65%; z-index: 1; overflow: hidden;
+}
+.oil-wave { position: absolute; bottom: 0; left: -50%; right: -50%; height: 100%; }
+.oil-wave svg { width: 200%; height: 100%; position: absolute; bottom: 0; }
+.oil-wave-1 { animation: waveSlosh 4s ease-in-out infinite; }
+.oil-wave-2 { animation: waveSlosh 5s ease-in-out infinite reverse; opacity: 0.5; }
+@keyframes waveSlosh {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  25% { transform: translateX(-3%) translateY(-2%); }
+  50% { transform: translateX(0) translateY(-4%); }
+  75% { transform: translateX(3%) translateY(-2%); }
+}
+
+.oil-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, var(--oil-color), var(--oil-color2));
+  transition: height 1s ease; z-index: 0;
+}
+
+/* Card content */
+.oil-card-content {
+  position: relative; z-index: 4;
+  height: 100%;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+}
+.oil-card-label {
+  font-size: 10px; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+}
+.oil-card-value {
+  font-family: var(--font-mono);
+  font-size: 32px; font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: 0 0 20px rgba(255,255,255,0.1);
+  line-height: 1;
+}
+.oil-card-unit { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.oil-card-status {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 6px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+}
+.oil-card-status.good { color: var(--success); background: rgba(0,230,118,0.1); }
+.oil-card-status.warn { color: var(--warning); background: rgba(255,170,0,0.1); }
+.oil-card-status.bad { color: var(--danger); background: rgba(255,59,92,0.1); }
+
+/* Pulse ring on card value */
+.value-ring {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 60px; height: 60px; border-radius: 50%;
+  border: 1px solid var(--accent);
+  opacity: 0; z-index: 3; pointer-events: none;
+}
+.oil-card:hover .value-ring {
+  animation: ringPulse 1.5s ease-out infinite;
+}
+@keyframes ringPulse {
+  0% { width: 40px; height: 40px; opacity: 0.4; }
+  100% { width: 120px; height: 120px; opacity: 0; }
+}
+
+/* ============================================================
+   TEMPERATURE CARD (with boiling animation)
+   ============================================================ */
+.temp-card .oil-liquid { height: 70%; }
+.temp-card .oil-fill {
+  background: linear-gradient(180deg, var(--boil-color), rgba(200,60,0,0.2));
+}
+
+/* Bubbles */
+.bubble-container {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 100%; z-index: 2; overflow: hidden; pointer-events: none;
+}
+.bubble {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,200,100,0.1));
+  border: 1px solid rgba(255,255,255,0.15);
+  animation: bubbleRise linear infinite;
+}
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-50%) scale(1.1) translateX(5px); opacity: 0.6; }
+  100% { transform: translateY(-120%) scale(0.5) translateX(-3px); opacity: 0; }
+}
+
+/* Steam */
+.steam-container {
+  position: absolute; top: -20px; left: 0; right: 0;
+  height: 40px; z-index: 5; overflow: visible; pointer-events: none;
+}
+.steam {
+  position: absolute; bottom: 0;
+  width: 8px; height: 8px;
+  background: var(--steam-color);
+  border-radius: 50%; filter: blur(4px);
+  animation: steamRise 2s ease-out infinite;
+}
+@keyframes steamRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  100% { transform: translateY(-40px) scale(3); opacity: 0; }
+}
+
+/* ============================================================
+   CHART PANELS
+   ============================================================ */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 800px) { .charts-row { grid-template-columns: 1fr; } }
+
+.chart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+  transition: all 0.4s;
+  position: relative; overflow: hidden;
+}
+/* Chart panel top accent line */
+.chart-panel::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.chart-panel:hover { border-color: var(--border-accent); box-shadow: var(--shadow-accent); }
+.chart-panel:hover::before { opacity: 1; }
+
+.chart-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.chart-title {
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.chart-title::before {
+  content: ''; width: 3px; height: 14px;
+  background: linear-gradient(180deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  box-shadow: 0 0 6px var(--accent-dim);
+}
+.chart-badge {
+  font-size: 10px; padding: 2px 10px;
+  border-radius: 6px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 600;
+  border: 1px solid var(--border-accent);
+}
+.chart-canvas-wrap { position: relative; width: 100%; height: 200px; }
+.chart-canvas-wrap canvas { width: 100% !important; height: 100% !important; }
+
+/* ============================================================
+   DATA TABLE
+   ============================================================ */
+.table-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  position: relative;
+}
+.table-panel::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0.3;
+}
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th {
+  text-align: left; padding: 10px 10px;
+  color: var(--text-dim); font-weight: 600;
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.02);
+  font-family: var(--font-mono); font-size: 12px;
+  white-space: nowrap; transition: background 0.2s;
+}
+.data-table tr:hover td { background: var(--bg-glass); }
+
+/* ============================================================
+   SETTINGS PANEL (slide-in)
+   ============================================================ */
+.settings-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s;
+}
+.settings-overlay.open { opacity: 1; pointer-events: auto; }
+
+.settings-panel {
+  position: fixed; top: 0; right: -420px; bottom: 0;
+  width: 400px; max-width: 90vw; z-index: 201;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border);
+  padding: 24px; overflow-y: auto;
+  transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-panel.open { right: 0; }
+
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 32px;
+}
+.settings-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.settings-close {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-secondary); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s;
+}
+.settings-close:hover { border-color: var(--danger); color: var(--danger); }
+
+.settings-group { margin-bottom: 28px; }
+.settings-group-title {
+  font-size: 11px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-bottom: 14px; font-weight: 700;
+}
+.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.theme-option {
+  padding: 12px 8px; border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--bg-glass); cursor: pointer;
+  text-align: center; transition: all 0.3s;
+}
+.theme-option:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.theme-option.active { border-color: var(--accent); background: var(--accent-dim); }
+.theme-swatch {
+  width: 32px; height: 32px; border-radius: 50%;
+  margin: 0 auto 8px;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+.theme-option-name { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+
+.lang-options { display: flex; gap: 10px; }
+.lang-option {
+  flex: 1; padding: 12px; border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--bg-glass); cursor: pointer;
+  text-align: center; font-size: 13px; font-weight: 600;
+  color: var(--text-secondary); transition: all 0.3s;
+}
+.lang-option:hover { border-color: var(--border-accent); }
+.lang-option.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+.settings-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.settings-item-label { font-size: 13px; color: var(--text-secondary); }
+.toggle-switch {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer; position: relative; transition: all 0.3s;
+}
+.toggle-switch.on { background: var(--accent-dim); border-color: var(--accent); }
+.toggle-switch::after {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--text-secondary);
+  top: 2px; left: 2px; transition: all 0.3s;
+}
+.toggle-switch.on::after { left: 22px; background: var(--accent); }
+
+/* ============================================================
+   TREND PAGE
+   ============================================================ */
+.trend-controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.trend-btn {
+  padding: 8px 18px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s;
+  font-family: var(--font-main);
+}
+.trend-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.trend-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+.trend-chart-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  backdrop-filter: blur(16px);
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.trend-chart-panel::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0.3;
+}
+.trend-chart-panel .chart-canvas-wrap { height: 300px; }
+
+.trend-stats {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.trend-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px; text-align: center;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.trend-stat-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0; transition: opacity 0.3s;
+}
+.trend-stat-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.trend-stat-card:hover::after { opacity: 1; }
+.trend-stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.trend-stat-value { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--accent); }
+.trend-stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer-info {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px; color: var(--text-dim);
+  backdrop-filter: blur(12px);
+}
+.footer-thresholds { display: flex; gap: 16px; flex-wrap: wrap; }
+.footer-threshold { display: flex; align-items: center; gap: 5px; }
+.footer-dot { width: 5px; height: 5px; border-radius: 50%; }
+.footer-dot.w { background: var(--warning); box-shadow: 0 0 6px rgba(255,170,0,0.4); }
+.footer-dot.c { background: var(--danger); box-shadow: 0 0 6px rgba(255,59,92,0.4); }
+
+/* ============================================================
+   GLOWING DIVIDER
+   ============================================================ */
+.glow-divider {
+  height: 1px; margin: 24px 0;
+  background: linear-gradient(90deg, transparent, var(--border-accent), var(--accent-glow), var(--border-accent), transparent);
+  opacity: 0.4;
+  animation: dividerPulse 5s ease-in-out infinite;
+}
+@keyframes dividerPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+.animate-in:nth-child(1) { animation-delay: 0.05s; }
+.animate-in:nth-child(2) { animation-delay: 0.1s; }
+.animate-in:nth-child(3) { animation-delay: 0.15s; }
+.animate-in:nth-child(4) { animation-delay: 0.2s; }
+.animate-in:nth-child(5) { animation-delay: 0.25s; }
+.animate-in:nth-child(6) { animation-delay: 0.3s; }
+.animate-in:nth-child(7) { animation-delay: 0.35s; }
+.animate-in:nth-child(8) { animation-delay: 0.4s; }
+
+/* Breathing glow on accent elements */
+@keyframes breatheGlow {
+  0%, 100% { filter: drop-shadow(0 0 2px var(--accent-dim)); }
+  50% { filter: drop-shadow(0 0 8px var(--accent-glow)); }
+}
+
+/* Shimmer effect for cards */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.oil-card .shimmer-line {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 5; pointer-events: none; overflow: hidden;
+}
+.oil-card .shimmer-line::after {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ============================================================
+   CHART TOOLTIP
+   ============================================================ */
+.chart-tooltip {
+  position: fixed; z-index: 500;
+  background: rgba(10, 16, 30, 0.94);
+  border: 1px solid var(--border-accent);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--text-primary);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.18s, transform 0.18s;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 20px var(--accent-dim);
+  max-width: 220px;
+  white-space: nowrap;
+}
+.chart-tooltip.visible { opacity: 1; transform: translateY(0); }
+.chart-tooltip .tt-date {
+  color: var(--text-dim); font-size: 9px;
+  margin-bottom: 6px; letter-spacing: 0.5px;
+}
+.chart-tooltip .tt-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 2px 0;
+}
+.chart-tooltip .tt-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.chart-tooltip .tt-label { color: var(--text-secondary); font-size: 10px; }
+.chart-tooltip .tt-val {
+  font-family: var(--font-mono); font-weight: 700;
+  margin-left: auto; font-size: 12px;
+}
+
+/* ============================================================
+   BRIGHTNESS / CONTRAST SLIDERS
+   ============================================================ */
+.slider-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.slider-row:last-child { border-bottom: none; }
+.slider-label {
+  font-size: 13px; color: var(--text-secondary);
+  min-width: 56px;
+}
+.slider-input {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px;
+  background: var(--bg-secondary);
+  outline: none; cursor: pointer;
+}
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 0 10px var(--accent-dim);
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.slider-input::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+.slider-input::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 0 10px var(--accent-dim);
+  cursor: pointer;
+}
+.slider-value {
+  font-family: var(--font-mono);
+  font-size: 12px; color: var(--accent);
+  min-width: 36px; text-align: right;
+}
+
+/* ============================================================
+   DEVICE OVERVIEW & RING CHARTS
+   ============================================================ */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 800px) { .overview-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .overview-grid { grid-template-columns: 1fr; } }
+
+.overview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+  text-align: center;
+  transition: all 0.4s;
+  position: relative; overflow: hidden;
+}
+.overview-card::before {
+  content: ''; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0.3;
+}
+.overview-card:hover { border-color: var(--border-accent); transform: translateY(-3px); box-shadow: var(--shadow-accent); }
+.overview-card-label {
+  font-size: 12px; color: var(--text-secondary);
+  font-weight: 600; letter-spacing: 0.5px;
+}
+
+.ring-chart-wrap {
+  width: 120px; height: 120px;
+  margin: 0 auto 12px;
+  position: relative;
+}
+.ring-chart-wrap canvas { width: 100% !important; height: 100% !important; }
+.ring-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.ring-center-value {
+  font-family: var(--font-mono);
+  font-size: 28px; font-weight: 700;
+  line-height: 1;
+}
+.ring-center-label {
+  font-size: 10px; color: var(--text-dim);
+  margin-top: 4px; text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.overview-stat-row {
+  display: flex; justify-content: center; gap: 24px;
+  margin-top: 8px;
+}
+.overview-stat {
+  text-align: center;
+}
+.overview-stat-value {
+  font-family: var(--font-mono);
+  font-size: 20px; font-weight: 700;
+}
+.overview-stat-label {
+  font-size: 10px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   ALARM PAGE
+   ============================================================ */
+.alarm-filters {
+  display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+}
+.alarm-filter-group {
+  display: flex; align-items: center; gap: 6px;
+}
+.alarm-filter-label {
+  font-size: 11px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.alarm-select {
+  padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: 12px; font-family: var(--font-main);
+  cursor: pointer; outline: none;
+  transition: border-color 0.3s;
+}
+.alarm-select:focus { border-color: var(--accent); }
+.alarm-select option { background: var(--bg-primary); color: var(--text-primary); }
+
+.alarm-date-input {
+  padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: 12px; font-family: var(--font-mono);
+  outline: none; transition: border-color 0.3s;
+}
+.alarm-date-input:focus { border-color: var(--accent); }
+
+.alarm-search-btn {
+  padding: 7px 18px; border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s;
+  font-family: var(--font-main);
+}
+.alarm-search-btn:hover { background: var(--accent); color: var(--bg-deep); }
+
+.alarm-summary {
+  display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.alarm-summary-item {
+  padding: 10px 18px; border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+.alarm-summary-count {
+  font-family: var(--font-mono);
+  font-size: 22px; font-weight: 700;
+}
+.alarm-summary-label {
+  font-size: 10px; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.alarm-table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  margin-bottom: 20px;
+}
+.alarm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.alarm-table th {
+  text-align: left; padding: 12px 14px;
+  color: var(--text-dim); font-weight: 600;
+  font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-glass);
+  white-space: nowrap;
+}
+.alarm-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  font-family: var(--font-mono); font-size: 12px;
+  white-space: nowrap; transition: background 0.2s;
+}
+.alarm-table tr:hover td { background: var(--bg-glass); }
+
+.alarm-level-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+}
+.alarm-level-badge.critical { color: var(--danger); background: rgba(255,59,92,0.12); border: 1px solid rgba(255,59,92,0.25); }
+.alarm-level-badge.warning { color: var(--warning); background: rgba(255,170,0,0.12); border: 1px solid rgba(255,170,0,0.25); }
+
+.alarm-status-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px;
+}
+.alarm-status-dot.active { background: var(--danger); box-shadow: 0 0 6px rgba(255,59,92,0.5); }
+.alarm-status-dot.resolved { background: var(--success); box-shadow: 0 0 6px rgba(0,230,118,0.5); }
+
+/* Pagination */
+.alarm-pagination {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 16px 0;
+}
+.alarm-page-btn {
+  padding: 6px 14px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-size: 12px; cursor: pointer;
+  transition: all 0.3s; font-family: var(--font-main);
+}
+.alarm-page-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.alarm-page-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.alarm-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.alarm-page-info {
+  font-size: 11px; color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.alarm-empty {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-dim); font-size: 13px;
+}
+
+/* Ring chart center text */
+.ring-value {
+  font-family: var(--font-mono);
+  font-size: 22px; font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.ring-unit {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--text-dim);
+}
+
+/* Alarm level badge variants */
+.alarm-level-badge.crit { color: var(--danger); background: rgba(255,59,92,0.12); border: 1px solid rgba(255,59,92,0.25); }
+.alarm-level-badge.warn { color: var(--warning); background: rgba(255,170,0,0.12); border: 1px solid rgba(255,170,0,0.25); }
+.alarm-level-badge.pending { color: var(--danger); background: rgba(255,59,92,0.08); border: 1px solid rgba(255,59,92,0.18); }
+.alarm-level-badge.confirmed { color: var(--warning); background: rgba(255,170,0,0.08); border: 1px solid rgba(255,170,0,0.18); }
+.alarm-level-badge.resolved { color: var(--success); background: rgba(0,230,118,0.08); border: 1px solid rgba(0,230,118,0.18); }
+
+/* Alarm action buttons */
+.alarm-action-btn {
+  padding: 4px 12px; border-radius: 6px;
+  border: 1px solid var(--border-accent);
+  background: var(--accent-dim);
+  color: var(--accent); font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.25s;
+  font-family: var(--font-main);
+}
+.alarm-action-btn:hover { background: var(--accent); color: var(--bg-deep); }
+.alarm-action-btn.resolve {
+  border-color: rgba(0,230,118,0.3); background: rgba(0,230,118,0.08); color: var(--success);
+}
+.alarm-action-btn.resolve:hover { background: var(--success); color: var(--bg-deep); }
+
+/* Pagination buttons */
+.page-btn {
+  padding: 5px 12px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-size: 12px; cursor: pointer;
+  transition: all 0.3s; font-family: var(--font-main);
+  min-width: 32px;
+}
+.page-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+.page-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-dots { color: var(--text-dim); font-size: 12px; padding: 0 4px; }
+
+/* ============================================================
+   TREND STATS GAUGES
+   ============================================================ */
+.gauge-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media (max-width: 800px) { .gauge-row { grid-template-columns: 1fr; } }
+.gauge-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(16px);
+  text-align: center;
+  position: relative; overflow: hidden;
+  transition: all 0.4s;
+}
+.gauge-card::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  opacity: 0; transition: opacity 0.3s;
+}
+.gauge-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.gauge-card:hover::after { opacity: 1; }
+.gauge-card.online::after { background: linear-gradient(90deg, var(--success), var(--accent)); }
+.gauge-card.offline::after { background: linear-gradient(90deg, var(--warning), #e67e22); }
+.gauge-card.alarm-rate::after { background: linear-gradient(90deg, var(--danger), #ff6b6b); }
+.gauge-value {
+  font-family: var(--font-mono);
+  font-size: 28px; font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.gauge-label {
+  font-size: 11px; color: var(--text-secondary);
+  margin-top: 6px; font-weight: 500;
+}
+</style>
+</head>
+<body>
+
+<!-- Layered background system -->
+<div class="bg-gradient-mesh"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="bg-orb bg-orb-3"></div>
+<div class="bg-grid"></div>
+<canvas id="bgCanvas"></canvas>
+<div class="scanline-overlay"></div>
+<div class="vignette"></div>
+
+<!-- Chart tooltip -->
+<div class="chart-tooltip" id="chartTooltip"></div>
+
+<!-- ========== TOP NAV ========== -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <div class="nav-logo">⚙</div>
+    <div>
+      <div class="nav-title" data-i18n="navTitle">油液智能监测平台</div>
+      <div class="nav-subtitle">MDS-Z4 · 长城100号润滑油</div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <div class="nav-time" id="navTime">--:--:--</div>
+    <div class="status-pill normal" id="statusPill">
+      <span class="status-dot"></span>
+      <span id="statusLabel" data-i18n="statusNormal">运行正常</span>
+    </div>
+    <button class="nav-btn" id="btnRefresh" title="刷新" onclick="refreshData()">⟳</button>
+    <button class="nav-btn" id="btnSettings" title="设置" onclick="toggleSettings()">⚙</button>
+  </div>
+</nav>
+
+<!-- ========== PAGE: DASHBOARD ========== -->
+<div class="page active" id="pageDashboard">
+  <div class="page-content">
+
+    <!-- Data Cards -->
+    <div class="section-header animate-in">
+      <div class="section-line"></div>
+      <div class="section-title" data-i18n="realtimeData">实时数据</div>
+      <div class="section-sub" id="dataTimeLabel">--</div>
+    </div>
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <div class="glow-divider"></div>
+
+    <!-- Charts -->
+    <div class="section-header animate-in">
+      <div class="section-line"></div>
+      <div class="section-title" data-i18n="trendOverview">趋势概览</div>
+      <div class="section-sub" data-i18n="last7days">近7天</div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-panel animate-in">
+        <div class="chart-header">
+          <div class="chart-title" data-i18n="particleTrend">颗粒度趋势</div>
+          <div class="chart-badge">5 CH</div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="chartParticle"></canvas></div>
+      </div>
+      <div class="chart-panel animate-in">
+        <div class="chart-header">
+          <div class="chart-title" data-i18n="tempMoistureTrend">温度/水分趋势</div>
+          <div class="chart-badge">DUAL</div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="chartTemp"></canvas></div>
+      </div>
+    </div>
+
+    <div class="glow-divider"></div>
+
+    <!-- Table -->
+    <div class="section-header animate-in">
+      <div class="section-line"></div>
+      <div class="section-title" data-i18n="recentRecords">最近记录</div>
+    </div>
+    <div class="table-panel animate-in">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th data-i18n="thTime">时间</th>
+            <th>L1</th><th>L2</th><th>L3</th><th>L4</th><th>L5</th>
+            <th data-i18n="thTemp">温度℃</th>
+            <th data-i18n="thWater">水含量</th>
+            <th data-i18n="thActivity">水活性</th>
+            <th data-i18n="thStatus">状态</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-info animate-in">
+      <div class="footer-thresholds">
+        <div class="footer-threshold"><span class="footer-dot w"></span><span data-i18n="threshParticle">颗粒预警≥18</span></div>
+        <div class="footer-threshold"><span class="footer-dot c"></span><span data-i18n="threshParticleCrit">颗粒严重≥25</span></div>
+        <div class="footer-threshold"><span class="footer-dot w"></span><span data-i18n="threshTemp">温度预警≥55℃</span></div>
+        <div class="footer-threshold"><span class="footer-dot w"></span><span data-i18n="threshWater">水含量≥150ppm</span></div>
+      </div>
+      <div id="footerUpdate" data-i18n="lastUpdate">最后更新: --</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== PAGE: TREND ========== -->
+<div class="page" id="pageTrend">
+  <div class="page-content">
+    <div class="section-header">
+      <div class="section-line"></div>
+      <div class="section-title" data-i18n="trendAnalysis">趋势分析</div>
+    </div>
+
+    <div class="trend-controls">
+      <button class="trend-btn active" data-range="7" onclick="setTrendRange(7, this)" data-i18n="range7d">7天</button>
+      <button class="trend-btn" data-range="14" onclick="setTrendRange(14, this)" data-i18n="range14d">14天</button>
+      <button class="trend-btn" data-range="30" onclick="setTrendRange(30, this)" data-i18n="range30d">30天</button>
+    </div>
+
+    <div class="trend-stats" id="trendStats"></div>
+
+    <div class="trend-chart-panel">
+      <div class="chart-header">
+        <div class="chart-title" data-i18n="particleFullTrend">颗粒度完整趋势</div>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="trendParticleFull"></canvas></div>
+    </div>
+
+    <div class="trend-chart-panel">
+      <div class="chart-header">
+        <div class="chart-title" data-i18n="tempFullTrend">温度/水分完整趋势</div>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="trendTempFull"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PAGE: ALARMS ========== -->
+<div class="page" id="pageAlarms">
+  <div class="page-content">
+    <div class="section-header animate-in">
+      <div class="section-line"></div>
+      <div class="section-title" data-i18n="alarmTitle">报警记录查询</div>
+    </div>
+
+    <!-- Device Overview Gauges -->
+    <div class="overview-grid animate-in" id="overviewGrid">
+      <div class="overview-card">
+        <div class="ring-chart-wrap">
+          <canvas id="ringOnline" width="120" height="120"></canvas>
+          <div class="ring-center">
+            <span class="ring-value" id="valOnline">--</span>
+            <span class="ring-unit">%</span>
+          </div>
+        </div>
+        <div class="overview-card-label" data-i18n="onlineRate">在线率</div>
+      </div>
+      <div class="overview-card">
+        <div class="ring-chart-wrap">
+          <canvas id="ringOffline" width="120" height="120"></canvas>
+          <div class="ring-center">
+            <span class="ring-value" id="valOffline">--</span>
+            <span class="ring-unit">%</span>
+          </div>
+        </div>
+        <div class="overview-card-label" data-i18n="offlineRate">离线率</div>
+      </div>
+      <div class="overview-card">
+        <div class="ring-chart-wrap">
+          <canvas id="ringAlarm" width="120" height="120"></canvas>
+          <div class="ring-center">
+            <span class="ring-value" id="valAlarm">--</span>
+            <span class="ring-unit">%</span>
+          </div>
+        </div>
+        <div class="overview-card-label" data-i18n="alarmRate">报警率</div>
+      </div>
+      <div class="overview-card">
+        <div class="ring-chart-wrap">
+          <canvas id="ringHealth" width="120" height="120"></canvas>
+          <div class="ring-center">
+            <span class="ring-value" id="valHealth">--</span>
+            <span class="ring-unit">%</span>
+          </div>
+        </div>
+        <div class="overview-card-label" data-i18n="healthRate">健康率</div>
+      </div>
+    </div>
+
+    <div class="glow-divider"></div>
+
+    <!-- Alarm Filters -->
+    <div class="alarm-filters animate-in">
+      <select class="alarm-select" id="alarmFilterType" onchange="filterAlarms()">
+        <option value="all" data-i18n-opt="filterAllType">全部类型</option>
+        <option value="particle" data-i18n-opt="filterParticle">颗粒度</option>
+        <option value="temperature" data-i18n-opt="filterTemp">温度</option>
+        <option value="water" data-i18n-opt="filterWater">水分</option>
+      </select>
+      <select class="alarm-select" id="alarmFilterLevel" onchange="filterAlarms()">
+        <option value="all" data-i18n-opt="filterAllLevel">全部级别</option>
+        <option value="1" data-i18n-opt="filterWarn">预警</option>
+        <option value="2" data-i18n-opt="filterCrit">严重</option>
+      </select>
+      <select class="alarm-select" id="alarmFilterStatus" onchange="filterAlarms()">
+        <option value="all" data-i18n-opt="filterAllStatus">全部状态</option>
+        <option value="pending" data-i18n-opt="filterPending">待处理</option>
+        <option value="confirmed" data-i18n-opt="filterConfirmed">已确认</option>
+        <option value="resolved" data-i18n-opt="filterResolved">已解决</option>
+      </select>
+      <select class="alarm-select" id="alarmFilterRange" onchange="filterAlarms()">
+        <option value="7" data-i18n-opt="range7d">近7天</option>
+        <option value="14" data-i18n-opt="range14d">近14天</option>
+        <option value="30" data-i18n-opt="range30d">近30天</option>
+      </select>
+    </div>
+
+    <!-- Alarm Summary -->
+    <div class="gauge-row animate-in" id="alarmSummary">
+      <div class="gauge-card">
+        <div class="gauge-value" id="alarmTotal">0</div>
+        <div class="gauge-label" data-i18n="alarmTotal">总报警</div>
+      </div>
+      <div class="gauge-card">
+        <div class="gauge-value" style="color:var(--warning)" id="alarmWarnCount">0</div>
+        <div class="gauge-label" data-i18n="alarmWarn">预警次数</div>
+      </div>
+      <div class="gauge-card">
+        <div class="gauge-value" style="color:var(--danger)" id="alarmCritCount">0</div>
+        <div class="gauge-label" data-i18n="alarmCrit">严重次数</div>
+      </div>
+      <div class="gauge-card">
+        <div class="gauge-value" style="color:var(--success)" id="alarmResolvedCount">0</div>
+        <div class="gauge-label" data-i18n="alarmResolved">已解决</div>
+      </div>
+    </div>
+
+    <!-- Alarm Table -->
+    <div class="alarm-table-wrap animate-in">
+      <table class="alarm-table">
+        <thead>
+          <tr>
+            <th data-i18n="alarmThTime">时间</th>
+            <th data-i18n="alarmThType">类型</th>
+            <th data-i18n="alarmThLevel">级别</th>
+            <th data-i18n="alarmThValue">数值</th>
+            <th data-i18n="alarmThStatus">状态</th>
+            <th data-i18n="alarmThAction">操作</th>
+          </tr>
+        </thead>
+        <tbody id="alarmTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="alarm-pagination" id="alarmPagination"></div>
+  </div>
+</div>
+
+<!-- ========== PAGE: SETTINGS ========== -->
+<div class="page" id="pageSettings">
+  <div class="page-content">
+    <div class="section-header">
+      <div class="section-line"></div>
+      <div class="section-title" data-i18n="settingsTitle">系统设置</div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title" data-i18n="themeStyle">主题风格</div>
+      <div class="theme-grid" id="themeGrid">
+        <div class="theme-option active" data-theme="default" onclick="applyTheme('default')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#111a2e,#00d4ff)"></div>
+          <div class="theme-option-name" data-i18n="themeTech">科技蓝</div>
+        </div>
+        <div class="theme-option" data-theme="cyberpunk" onclick="applyTheme('cyberpunk')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#180a35,#ff00e5)"></div>
+          <div class="theme-option-name" data-i18n="themeCyber">赛博朋克</div>
+        </div>
+        <div class="theme-option" data-theme="matrix" onclick="applyTheme('matrix')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#071a07,#00ff41)"></div>
+          <div class="theme-option-name" data-i18n="themeMatrix">矩阵绿</div>
+        </div>
+        <div class="theme-option" data-theme="deepblue" onclick="applyTheme('deepblue')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#0a1838,#4488ff)"></div>
+          <div class="theme-option-name" data-i18n="themeDeep">深空蓝</div>
+        </div>
+        <div class="theme-option" data-theme="flame" onclick="applyTheme('flame')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#201005,#ff6600)"></div>
+          <div class="theme-option-name" data-i18n="themeFlame">赤焰红</div>
+        </div>
+        <div class="theme-option" data-theme="aurora" onclick="applyTheme('aurora')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#082820,#00e676)"></div>
+          <div class="theme-option-name" data-i18n="themeAurora">极光绿</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title" data-i18n="language">语言</div>
+      <div class="lang-options">
+        <div class="lang-option active" data-lang="zh" onclick="applyLang('zh')">中文</div>
+        <div class="lang-option" data-lang="en" onclick="applyLang('en')">English</div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title" data-i18n="display">显示</div>
+      <div class="settings-item">
+        <span class="settings-item-label" data-i18n="particleBg">粒子背景动画</span>
+        <div class="toggle-switch on" id="toggleParticles" onclick="toggleParticles()"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label" data-i18n="oilAnim">油液晃动动画</span>
+        <div class="toggle-switch on" id="toggleOil" onclick="toggleOilAnim()"></div>
+      </div>
+      <div class="settings-item">
+        <span class="settings-item-label" data-i18n="boilAnim">沸腾冒气动画</span>
+        <div class="toggle-switch on" id="toggleBoil" onclick="toggleBoilAnim()"></div>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label" data-i18n="brightness">亮度</span>
+        <input type="range" class="slider-input" id="sliderBrightness" min="50" max="150" value="100" oninput="applyBrightness(this.value)">
+        <span class="slider-value" id="valBrightness">100%</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label" data-i18n="contrast">对比度</span>
+        <input type="range" class="slider-input" id="sliderContrast" min="50" max="150" value="100" oninput="applyContrast(this.value)">
+        <span class="slider-value" id="valContrast">100%</span>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title" data-i18n="about">关于</div>
+      <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">
+        <div data-i18n="aboutText">冲压车间压机润滑油智能监测系统 v2.0</div>
+        <div>MDS-Z4 颗粒计数器 · RS485/ModBus RTU</div>
+        <div data-i18n="aboutOil">长城100号润滑油 · ISO 4406标准</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SETTINGS OVERLAY ========== -->
+<div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
+
+<!-- ========== BOTTOM TAB BAR ========== -->
+<div class="tab-bar">
+  <div class="tab-item active" data-page="pageDashboard" onclick="switchPage('pageDashboard', this)">
+    <span class="tab-icon">◉</span>
+    <span class="tab-label" data-i18n="tabDashboard">监控台</span>
+  </div>
+  <div class="tab-item" data-page="pageTrend" onclick="switchPage('pageTrend', this)">
+    <span class="tab-icon">◈</span>
+    <span class="tab-label" data-i18n="tabTrend">趋势</span>
+  </div>
+  <div class="tab-item" data-page="pageAlarms" onclick="switchPage('pageAlarms', this)">
+    <span class="tab-icon">⚠</span>
+    <span class="tab-label" data-i18n="tabAlarms">报警</span>
+  </div>
+  <div class="tab-item" data-page="pageSettings" onclick="switchPage('pageSettings', this)">
+    <span class="tab-icon">⚙</span>
+    <span class="tab-label" data-i18n="tabSettings">设置</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG & STATE
+// ============================================================
+const CFG = {
+  apiBase: '/api/v1',
+  username: 'mds26061103', password: '123456', deviceId: 56857,
+  thresholds: {
+    particle: { warning: 18, critical: 25 },
+    temperature: { low: 10, highWarn: 55, highCritical: 65 },
+    waterContent: { warning: 150, critical: 300 },
+    waterActivity: { warning: 0.7, critical: 0.85 }
+  }
+};
+
+let state = {
+  currentData: null,
+  historyData: [],
+  token: null,
+  theme: 'default',
+  lang: 'zh',
+  particlesEnabled: true,
+  oilAnimEnabled: true,
+  boilAnimEnabled: true,
+  trendRange: 7,
+  brightness: 100,
+  contrast: 100
+};
+
+// ============================================================
+// I18N
+// ============================================================
+const I18N = {
+  zh: {
+    navTitle: '油液智能监测平台', statusNormal: '运行正常', statusWarning: '预警提醒', statusCritical: '严重报警',
+    realtimeData: '实时数据', trendOverview: '趋势概览', last7days: '近7天',
+    particleTrend: '颗粒度趋势', tempMoistureTrend: '温度/水分趋势',
+    recentRecords: '最近记录', thTime: '时间', thTemp: '温度℃', thWater: '水含量', thActivity: '水活性', thStatus: '状态',
+    threshParticle: '颗粒预警≥18', threshParticleCrit: '颗粒严重≥25', threshTemp: '温度预警≥55℃', threshWater: '水含量≥150ppm',
+    lastUpdate: '最后更新: --', trendAnalysis: '趋势分析',
+    range7d: '7天', range14d: '14天', range30d: '30天',
+    particleFullTrend: '颗粒度完整趋势', tempFullTrend: '温度/水分完整趋势',
+    settingsTitle: '系统设置', themeStyle: '主题风格', language: '语言', display: '显示',
+    particleBg: '粒子背景动画', oilAnim: '油液晃动动画', boilAnim: '沸腾冒气动画',
+    themeTech: '科技蓝', themeCyber: '赛博朋克', themeMatrix: '矩阵绿',
+    themeDeep: '深空蓝', themeFlame: '赤焰红', themeAurora: '极光绿',
+    about: '关于', aboutText: '冲压车间压机润滑油智能监测系统 v2.0', aboutOil: '长城100号润滑油 · ISO 4406标准',
+    tabDashboard: '监控台', tabTrend: '趋势', tabSettings: '设置',
+    statusGood: '正常', statusWarn: '预警', statusBad: '严重',
+    cardL1: '等级1 (>4μm)', cardL2: '等级2 (>6μm)', cardL3: '等级3 (>14μm)',
+    cardL4: '等级4 (>21μm)', cardL5: '等级5 (>38μm)', cardTemp: '油温', cardWater: '水含量', cardActivity: '水活性',
+    unitPc: '个/mL', unitC: '℃', unitPpm: 'ppm', unitAw: 'aw',
+    noData: '暂无数据', coverageDays: '覆盖天数', alarmCount: '报警次数',
+    avgL1: 'L1均值', tempRange: '温度范围', avgWater: '水含量均值',
+    brightness: '亮度', contrast: '对比度',
+    tabAlarms: '报警',
+    alarmTitle: '报警记录查询',
+    onlineRate: '在线率', offlineRate: '离线率', alarmRate: '报警率', healthRate: '健康率',
+    filterAllType: '全部类型', filterParticle: '颗粒度', filterTemp: '温度', filterWater: '水分',
+    filterAllLevel: '全部级别', filterWarn: '预警', filterCrit: '严重',
+    filterAllStatus: '全部状态', filterPending: '待处理', filterConfirmed: '已确认', filterResolved: '已解决',
+    alarmTotal: '总报警', alarmWarn: '预警次数', alarmCrit: '严重次数', alarmResolved: '已解决',
+    alarmThTime: '时间', alarmThType: '类型', alarmThLevel: '级别', alarmThValue: '数值', alarmThStatus: '状态', alarmThAction: '操作',
+    alarmConfirm: '确认', alarmResolve: '解决',
+    alarmTypeParticle: '颗粒度', alarmTypeTemp: '温度', alarmTypeWater: '水分',
+    alarmLevelWarn: '预警', alarmLevelCrit: '严重',
+    alarmStatusPending: '待处理', alarmStatusConfirmed: '已确认', alarmStatusResolved: '已解决',
+    deviceStatus: '设备状态', deviceOnline: '在线', deviceOffline: '离线', deviceAlarm: '报警中', deviceHealth: '健康'
+  },
+  en: {
+    navTitle: 'Oil Intelligence Monitor', statusNormal: 'Normal', statusWarning: 'Warning', statusCritical: 'Critical',
+    realtimeData: 'Real-time Data', trendOverview: 'Trend Overview', last7days: 'Last 7 Days',
+    particleTrend: 'Particle Trend', tempMoistureTrend: 'Temp / Moisture Trend',
+    recentRecords: 'Recent Records', thTime: 'Time', thTemp: 'Temp ℃', thWater: 'Water ppm', thActivity: 'Activity aw', thStatus: 'Status',
+    threshParticle: 'Particle Warn≥18', threshParticleCrit: 'Particle Crit≥25', threshTemp: 'Temp Warn≥55℃', threshWater: 'Water≥150ppm',
+    lastUpdate: 'Last update: --', trendAnalysis: 'Trend Analysis',
+    range7d: '7 Days', range14d: '14 Days', range30d: '30 Days',
+    particleFullTrend: 'Particle Full Trend', tempFullTrend: 'Temp / Moisture Full Trend',
+    settingsTitle: 'Settings', themeStyle: 'Theme', language: 'Language', display: 'Display',
+    particleBg: 'Particle Background', oilAnim: 'Oil Slosh Animation', boilAnim: 'Boiling Steam Animation',
+    themeTech: 'Tech Blue', themeCyber: 'Cyberpunk', themeMatrix: 'Matrix',
+    themeDeep: 'Deep Blue', themeFlame: 'Flame', themeAurora: 'Aurora',
+    about: 'About', aboutText: 'Press Oil Smart Monitoring System v2.0', aboutOil: 'Great Wall 100# Oil · ISO 4406',
+    tabDashboard: 'Dashboard', tabTrend: 'Trend', tabSettings: 'Settings',
+    statusGood: 'Normal', statusWarn: 'Warning', statusBad: 'Critical',
+    cardL1: 'Level 1 (>4μm)', cardL2: 'Level 2 (>6μm)', cardL3: 'Level 3 (>14μm)',
+    cardL4: 'Level 4 (>21μm)', cardL5: 'Level 5 (>38μm)', cardTemp: 'Oil Temp', cardWater: 'Water Content', cardActivity: 'Water Activity',
+    unitPc: 'pcs/mL', unitC: '℃', unitPpm: 'ppm', unitAw: 'aw',
+    noData: 'No Data', coverageDays: 'Days', alarmCount: 'Alarms',
+    avgL1: 'L1 Avg', tempRange: 'Temp Range', avgWater: 'Water Avg',
+    brightness: 'Brightness', contrast: 'Contrast',
+    tabAlarms: 'Alarms',
+    alarmTitle: 'Alarm Records',
+    onlineRate: 'Online Rate', offlineRate: 'Offline Rate', alarmRate: 'Alarm Rate', healthRate: 'Health Rate',
+    filterAllType: 'All Types', filterParticle: 'Particle', filterTemp: 'Temperature', filterWater: 'Moisture',
+    filterAllLevel: 'All Levels', filterWarn: 'Warning', filterCrit: 'Critical',
+    filterAllStatus: 'All Status', filterPending: 'Pending', filterConfirmed: 'Confirmed', filterResolved: 'Resolved',
+    alarmTotal: 'Total Alarms', alarmWarn: 'Warnings', alarmCrit: 'Critical', alarmResolved: 'Resolved',
+    alarmThTime: 'Time', alarmThType: 'Type', alarmThLevel: 'Level', alarmThValue: 'Value', alarmThStatus: 'Status', alarmThAction: 'Action',
+    alarmConfirm: 'Confirm', alarmResolve: 'Resolve',
+    alarmTypeParticle: 'Particle', alarmTypeTemp: 'Temperature', alarmTypeWater: 'Moisture',
+    alarmLevelWarn: 'Warning', alarmLevelCrit: 'Critical',
+    alarmStatusPending: 'Pending', alarmStatusConfirmed: 'Confirmed', alarmStatusResolved: 'Resolved',
+    deviceStatus: 'Device Status', deviceOnline: 'Online', deviceOffline: 'Offline', deviceAlarm: 'Alarming', deviceHealth: 'Healthy'
+  }
+};
+
+function t(key) { return I18N[state.lang]?.[key] || I18N.zh[key] || key; }
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  document.documentElement.setAttribute('data-lang', state.lang);
+}
+
+// ============================================================
+// API
+// ============================================================
+async function apiLogin() {
+  try {
+    const r = await fetch(`${CFG.apiBase}/login/login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: CFG.username, password: CFG.password })
+    });
+    const d = await r.json();
+    if (d.code === 0) { state.token = d.data.token; return true; }
+  } catch(e) {}
+  return false;
+}
+
+async function apiFetchLatest() {
+  if (!state.token) return null;
+  try {
+    const r = await fetch(`${CFG.apiBase}/device/lastdps?deviceId=${CFG.deviceId}`, {
+      headers: { 'X-Token': state.token }
+    });
+    const d = await r.json();
+    if (d.code !== 0 || !d.data.rows?.length) return null;
+    const m = {};
+    d.data.rows[0].lastdp.forEach(dp => m[dp.name] = dp);
+    return {
+      timestamp: m.d_1?.at || new Date().toISOString().replace('T',' ').substring(0,19),
+      level1: m.d_1?.value, level2: m.d_2?.value, level3: m.d_3?.value,
+      level4: m.d_4?.value, level5: m.d_5?.value,
+      temperature: m.d_6?.value, waterContent: m.d_7?.value, waterActivity: m.d_8?.value
+    };
+  } catch(e) { return null; }
+}
+
+// ============================================================
+// MOCK DATA
+// ============================================================
+function genMockHistory(days) {
+  const data = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now - i * 24 * 3600 * 1000);
+    const ts = d.toISOString().replace('T',' ').substring(0,19);
+    const base = 10 + Math.sin(i * 0.5) * 3;
+    data.push({
+      timestamp: ts,
+      level1: +(base + Math.random() * 4).toFixed(1),
+      level2: +(base - 1 + Math.random() * 3).toFixed(1),
+      level3: +(base - 2 + Math.random() * 3).toFixed(1),
+      level4: +(base - 3 + Math.random() * 2).toFixed(1),
+      level5: +(base - 4 + Math.random() * 2).toFixed(1),
+      temperature: +(35 + Math.sin(i * 0.3) * 5 + Math.random() * 3).toFixed(1),
+      waterContent: +(85 + Math.random() * 20).toFixed(1),
+      waterActivity: +(0.52 + Math.random() * 0.08).toFixed(2),
+      alarmLevel: 0
+    });
+  }
+  return data;
+}
+
+// ============================================================
+// ALARM CHECK
+// ============================================================
+function checkAlarm(d) {
+  let level = 0; const msgs = [];
+  if (d.level1 === -1 || d.level1 == null) return { level: 0, msgs: [] };
+  const T = CFG.thresholds;
+  ['level1','level2','level3','level4','level5'].forEach(k => {
+    const v = d[k]; if (v == null || v < 0) return;
+    if (v >= T.particle.critical) { level = Math.max(level,2); msgs.push(`${k}=${v}`); }
+    else if (v >= T.particle.warning) { level = Math.max(level,1); }
+  });
+  if (d.temperature != null) {
+    if (d.temperature >= T.temperature.highCritical) level = Math.max(level,2);
+    else if (d.temperature >= T.temperature.highWarn) level = Math.max(level,1);
+  }
+  if (d.waterContent != null && d.waterContent >= T.waterContent.warning) level = Math.max(level,1);
+  if (d.waterActivity != null && d.waterActivity >= T.waterActivity.warning) level = Math.max(level,1);
+  return { level, msgs };
+}
+
+// ============================================================
+// RENDER: OIL CARDS
+// ============================================================
+function renderCards(data) {
+  const grid = document.getElementById('cardsGrid');
+  const T = CFG.thresholds;
+  const items = [
+    { label: t('cardL1'), value: data.level1, unit: t('unitPc'), key: 'level1', threshold: T.particle.warning, critThreshold: T.particle.critical },
+    { label: t('cardL2'), value: data.level2, unit: t('unitPc'), key: 'level2', threshold: T.particle.warning, critThreshold: T.particle.critical },
+    { label: t('cardL3'), value: data.level3, unit: t('unitPc'), key: 'level3', threshold: T.particle.warning, critThreshold: T.particle.critical },
+    { label: t('cardL4'), value: data.level4, unit: t('unitPc'), key: 'level4', threshold: T.particle.warning, critThreshold: T.particle.critical },
+    { label: t('cardL5'), value: data.level5, unit: t('unitPc'), key: 'level5', threshold: T.particle.warning, critThreshold: T.particle.critical },
+    { label: t('cardTemp'), value: data.temperature, unit: t('unitC'), key: 'temperature', threshold: T.temperature.highWarn, critThreshold: T.temperature.highCritical, isTemp: true },
+    { label: t('cardWater'), value: data.waterContent, unit: t('unitPpm'), key: 'waterContent', threshold: T.waterContent.warning, critThreshold: T.waterContent.critical },
+    { label: t('cardActivity'), value: data.waterActivity, unit: t('unitAw'), key: 'waterActivity', threshold: T.waterActivity.warning, critThreshold: T.waterActivity.critical },
+  ];
+
+  grid.innerHTML = items.map((item, idx) => {
+    const val = item.value != null ? item.value : '--';
+    let status = 'good', statusText = t('statusGood');
+    if (typeof val === 'number') {
+      if (val >= item.critThreshold) { status = 'bad'; statusText = t('statusBad'); }
+      else if (val >= item.threshold) { status = 'warn'; statusText = t('statusWarn'); }
+    }
+
+    const fillPercent = typeof val === 'number' ? Math.min((val / (item.critThreshold * 1.3)) * 100, 90) : 30;
+    const isTempCard = item.isTemp ? 'temp-card' : '';
+
+    // Bubbles for temp card
+    let bubblesHtml = '';
+    let steamHtml = '';
+    if (item.isTemp && state.boilAnimEnabled && typeof val === 'number') {
+      const intensity = Math.max(0, (val - 30) / 40);
+      const bubbleCount = Math.floor(intensity * 8) + 2;
+      bubblesHtml = '<div class="bubble-container">';
+      for (let i = 0; i < bubbleCount; i++) {
+        const size = 3 + Math.random() * 6;
+        const left = 10 + Math.random() * 80;
+        const dur = 1.5 + Math.random() * 2;
+        const delay = Math.random() * 3;
+        bubblesHtml += `<div class="bubble" style="width:${size}px;height:${size}px;left:${left}%;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
+      }
+      bubblesHtml += '</div>';
+
+      if (val >= 45) {
+        const steamCount = Math.floor((val - 45) / 5) + 1;
+        steamHtml = '<div class="steam-container">';
+        for (let i = 0; i < steamCount; i++) {
+          const left = 20 + Math.random() * 60;
+          const delay = Math.random() * 2;
+          steamHtml += `<div class="steam" style="left:${left}%;animation-delay:${delay}s"></div>`;
+        }
+        steamHtml += '</div>';
+      }
+    }
+
+    return `
+      <div class="oil-card ${isTempCard} animate-in" style="animation-delay:${idx * 0.06}s">
+        <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
+        <div class="corner-deco bl"></div><div class="corner-deco br"></div>
+        <div class="value-ring"></div>
+        <div class="shimmer-line"></div>
+        <div class="oil-fill" style="height:${fillPercent}%"></div>
+        ${state.oilAnimEnabled ? `
+        <div class="oil-liquid">
+          <div class="oil-wave oil-wave-1">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M0,60 C150,20 350,100 600,60 C850,20 1050,100 1200,60 L1200,120 L0,120 Z" fill="var(--oil-color)"/>
+            </svg>
+          </div>
+          <div class="oil-wave oil-wave-2">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M0,80 C200,40 400,100 600,70 C800,40 1000,90 1200,60 L1200,120 L0,120 Z" fill="var(--oil-color2)"/>
+            </svg>
+          </div>
+        </div>` : ''}
+        ${bubblesHtml}
+        ${steamHtml}
+        <div class="oil-card-content">
+          <div class="oil-card-label">${item.label}</div>
+          <div>
+            <div class="oil-card-value">${val}</div>
+            <div class="oil-card-unit">${item.unit}</div>
+          </div>
+          <div class="oil-card-status ${status}">${statusText}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// RENDER: STATUS
+// ============================================================
+function updateStatus(alarm) {
+  const pill = document.getElementById('statusPill');
+  const label = document.getElementById('statusLabel');
+  pill.className = 'status-pill';
+  if (alarm.level >= 2) { pill.classList.add('critical'); label.textContent = t('statusCritical'); }
+  else if (alarm.level >= 1) { pill.classList.add('warning'); label.textContent = t('statusWarning'); }
+  else { pill.classList.add('normal'); label.textContent = t('statusNormal'); }
+}
+
+// ============================================================
+// RENDER: TABLE
+// ============================================================
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const recent = state.historyData.slice(-10).reverse();
+  tbody.innerHTML = recent.map(d => {
+    const a = checkAlarm(d);
+    let s = `<span style="color:var(--success)">${t('statusGood')}</span>`;
+    if (a.level === 1) s = `<span style="color:var(--warning)">${t('statusWarn')}</span>`;
+    if (a.level === 2) s = `<span style="color:var(--danger)">${t('statusBad')}</span>`;
+    return `<tr>
+      <td>${d.timestamp}</td>
+      <td>${d.level1??'--'}</td><td>${d.level2??'--'}</td><td>${d.level3??'--'}</td>
+      <td>${d.level4??'--'}</td><td>${d.level5??'--'}</td>
+      <td>${d.temperature??'--'}</td><td>${d.waterContent??'--'}</td><td>${d.waterActivity??'--'}</td>
+      <td>${s}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// CHART DRAWING (Canvas)
+// ============================================================
+const chartMeta = {};
+
+function drawChart(canvasId, datasets, xLabels, options = {}) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 20, right: options.rightPad || 20, bottom: 28, left: 40 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  let allVals = [];
+  datasets.forEach(ds => ds.data.forEach(v => { if (v != null) allVals.push(v); }));
+  if (allVals.length === 0) return;
+  let maxV = Math.max(...allVals) * 1.15;
+  let minV = Math.min(0, Math.min(...allVals) * 0.9);
+  if (options.minV != null) minV = options.minV;
+  if (options.maxV != null) maxV = options.maxV;
+
+  const xStep = cW / Math.max(xLabels.length - 1, 1);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + cH * (1 - i / 4);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '9px monospace'; ctx.textAlign = 'right';
+    ctx.fillText((minV + (maxV - minV) * i / 4).toFixed(options.decimals || 0), pad.left - 6, y + 3);
+  }
+
+  // Threshold lines
+  if (options.thresholds) {
+    options.thresholds.forEach(th => {
+      const y = pad.top + cH * (1 - (th.value - minV) / (maxV - minV));
+      if (y < pad.top || y > pad.top + cH) return;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = th.color;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  // Data lines
+  datasets.forEach(ds => {
+    // Gradient fill
+    if (ds.fill) {
+      const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
+      grad.addColorStop(0, ds.color.replace(')', ',0.15)').replace('rgb', 'rgba'));
+      grad.addColorStop(1, ds.color.replace(')', ',0.0)').replace('rgb', 'rgba'));
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      let started = false;
+      ds.data.forEach((v, i) => {
+        if (v == null) return;
+        const x = pad.left + i * xStep;
+        const y = pad.top + cH * (1 - (v - minV) / (maxV - minV));
+        if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(pad.left + (ds.data.length - 1) * xStep, pad.top + cH);
+      ctx.lineTo(pad.left, pad.top + cH);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.strokeStyle = ds.color;
+    ctx.lineWidth = ds.lineWidth || 1.5;
+    ctx.globalAlpha = ds.alpha || 0.85;
+    ctx.beginPath();
+    let started = false;
+    ds.data.forEach((v, i) => {
+      if (v == null) return;
+      const x = pad.left + i * xStep;
+      const y = pad.top + cH * (1 - (v - minV) / (maxV - minV));
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Points with glow
+    if (ds.points !== false) {
+      ds.data.forEach((v, i) => {
+        if (v == null) return;
+        const x = pad.left + i * xStep;
+        const y = pad.top + cH * (1 - (v - minV) / (maxV - minV));
+        // Glow
+        ctx.fillStyle = ds.color;
+        ctx.globalAlpha = 0.15;
+        ctx.beginPath(); ctx.arc(x, y, (ds.pointSize || 2.5) * 2.5, 0, Math.PI * 2); ctx.fill();
+        // Point
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = ds.color;
+        ctx.beginPath(); ctx.arc(x, y, ds.pointSize || 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
+  });
+
+  // X labels
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '9px monospace'; ctx.textAlign = 'center';
+  const labelStep = Math.max(1, Math.floor(xLabels.length / 7));
+  xLabels.forEach((label, i) => {
+    if (i % labelStep === 0 || i === xLabels.length - 1) {
+      ctx.fillText(label, pad.left + i * xStep, H - 6);
+    }
+  });
+
+  // Legend
+  if (datasets.length > 1) {
+    let lx = pad.left;
+    datasets.forEach(ds => {
+      if (!ds.label) return;
+      ctx.fillStyle = ds.color;
+      ctx.globalAlpha = 0.8;
+      ctx.fillRect(lx, 8, 10, 3);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '9px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(ds.label, lx + 14, 12);
+      lx += ctx.measureText(ds.label).width + 30;
+    });
+  }
+
+  // Store metadata for tooltip
+  chartMeta[canvasId] = { datasets, xLabels, pad, cW, cH, W, H, minV, maxV, xStep };
+}
+
+function drawDashboardCharts() {
+  const data = state.historyData;
+  if (data.length < 2) return;
+  const labels = data.map(d => d.timestamp.substring(5, 10));
+  const T = CFG.thresholds;
+
+  drawChart('chartParticle', [
+    { label: 'L1', data: data.map(d => d.level1), color: '#e74c3c', fill: true },
+    { label: 'L2', data: data.map(d => d.level2), color: '#e67e22' },
+    { label: 'L3', data: data.map(d => d.level3), color: '#f1c40f' },
+    { label: 'L4', data: data.map(d => d.level4), color: '#2ecc71' },
+    { label: 'L5', data: data.map(d => d.level5), color: '#3498db' },
+  ], labels, {
+    thresholds: [
+      { value: T.particle.warning, color: 'rgba(255,170,0,0.6)' },
+      { value: T.particle.critical, color: 'rgba(255,59,92,0.6)' }
+    ]
+  });
+
+  drawChart('chartTemp', [
+    { label: state.lang === 'zh' ? '油温℃' : 'Temp℃', data: data.map(d => d.temperature), color: '#e74c3c', fill: true },
+    { label: state.lang === 'zh' ? '水含量ppm' : 'Water ppm', data: data.map(d => d.waterContent), color: '#3498db' },
+  ], labels, {
+    rightPad: 45,
+    thresholds: [
+      { value: T.temperature.highWarn, color: 'rgba(255,170,0,0.5)' }
+    ]
+  });
+}
+
+function drawTrendCharts() {
+  const range = state.trendRange;
+  const data = state.historyData.slice(-range);
+  if (data.length < 2) return;
+  const labels = data.map(d => d.timestamp.substring(5, 10));
+  const T = CFG.thresholds;
+
+  drawChart('trendParticleFull', [
+    { label: 'L1', data: data.map(d => d.level1), color: '#e74c3c', fill: true, lineWidth: 2 },
+    { label: 'L2', data: data.map(d => d.level2), color: '#e67e22', lineWidth: 2 },
+    { label: 'L3', data: data.map(d => d.level3), color: '#f1c40f', lineWidth: 2 },
+    { label: 'L4', data: data.map(d => d.level4), color: '#2ecc71', lineWidth: 2 },
+    { label: 'L5', data: data.map(d => d.level5), color: '#3498db', lineWidth: 2 },
+  ], labels, {
+    thresholds: [
+      { value: T.particle.warning, color: 'rgba(255,170,0,0.6)' },
+      { value: T.particle.critical, color: 'rgba(255,59,92,0.6)' }
+    ]
+  });
+
+  drawChart('trendTempFull', [
+    { label: state.lang === 'zh' ? '油温℃' : 'Temp℃', data: data.map(d => d.temperature), color: '#e74c3c', fill: true, lineWidth: 2 },
+    { label: state.lang === 'zh' ? '水含量ppm' : 'Water ppm', data: data.map(d => d.waterContent), color: '#3498db', lineWidth: 2 },
+    { label: state.lang === 'zh' ? '水活性aw' : 'Activity', data: data.map(d => d.waterActivity), color: '#9b59b6', lineWidth: 1.5, alpha: 0.7 },
+  ], labels, {
+    rightPad: 45,
+    thresholds: [
+      { value: T.temperature.highWarn, color: 'rgba(255,170,0,0.5)' }
+    ]
+  });
+
+  renderTrendStats(data);
+}
+
+function renderTrendStats(data) {
+  const container = document.getElementById('trendStats');
+  const valid = data.filter(d => d.level1 != null && d.level1 >= 0);
+  if (!valid.length) return;
+
+  const avgL1 = valid.reduce((s, d) => s + d.level1, 0) / valid.length;
+  const maxL1 = Math.max(...valid.map(d => d.level1));
+  const temps = valid.map(d => d.temperature).filter(v => v != null);
+  const wcs = valid.map(d => d.waterContent).filter(v => v != null);
+  const alarms = data.filter(d => checkAlarm(d).level > 0).length;
+
+  const stats = [
+    { label: t('coverageDays'), value: data.length, sub: state.lang === 'zh' ? '天' : 'days' },
+    { label: t('avgL1'), value: avgL1.toFixed(1), sub: t('unitPc') },
+    { label: 'Max L1', value: maxL1, sub: t('unitPc') },
+    { label: t('tempRange'), value: `${Math.min(...temps).toFixed(1)}~${Math.max(...temps).toFixed(1)}`, sub: '℃' },
+    { label: t('avgWater'), value: (wcs.reduce((s,v) => s+v, 0) / wcs.length).toFixed(1), sub: 'ppm' },
+    { label: t('alarmCount'), value: alarms, sub: state.lang === 'zh' ? '次' : 'times' },
+  ];
+
+  container.innerHTML = stats.map(s => `
+    <div class="trend-stat-card">
+      <div class="trend-stat-label">${s.label}</div>
+      <div class="trend-stat-value">${s.value}</div>
+      <div class="trend-stat-sub">${s.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// PARTICLE BACKGROUND
+// ============================================================
+function initParticles() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const COUNT = 60;
+
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class P {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.vx = (Math.random() - 0.5) * 0.25;
+      this.vy = (Math.random() - 0.5) * 0.25;
+      this.r = Math.random() * 1.5 + 0.3;
+      this.a = Math.random() * 0.3 + 0.05;
+      this.pulseSpeed = 0.005 + Math.random() * 0.01;
+      this.pulsePhase = Math.random() * Math.PI * 2;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+      this.pulsePhase += this.pulseSpeed;
+    }
+    draw() {
+      const style = getComputedStyle(document.documentElement);
+      const accent = style.getPropertyValue('--accent').trim() || '#00d4ff';
+      const pulse = 0.5 + 0.5 * Math.sin(this.pulsePhase);
+      ctx.fillStyle = accent;
+      ctx.globalAlpha = this.a * (0.6 + 0.4 * pulse);
+      ctx.beginPath(); ctx.arc(this.x, this.y, this.r * (0.8 + 0.2 * pulse), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < COUNT; i++) particles.push(new P());
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (state.particlesEnabled) {
+      particles.forEach(p => { p.update(); p.draw(); });
+      const style = getComputedStyle(document.documentElement);
+      const accent = style.getPropertyValue('--accent').trim() || '#00d4ff';
+      ctx.strokeStyle = accent; ctx.lineWidth = 0.3;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 120) {
+            ctx.globalAlpha = 0.07 * (1 - dist / 120);
+            ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchPage(pageId, tabEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+
+  if (pageId === 'pageTrend') {
+    setTimeout(() => drawTrendCharts(), 100);
+  }
+  if (pageId === 'pageAlarms') {
+    setTimeout(() => {
+      renderOverviewRings();
+      if (!allAlarms.length) {
+        allAlarms = genMockAlarms();
+      }
+      filterAlarms();
+    }, 100);
+  }
+}
+
+function setTrendRange(days, btn) {
+  state.trendRange = days;
+  document.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawTrendCharts();
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function toggleSettings() {
+  switchPage('pageSettings', document.querySelector('.tab-item[data-page="pageSettings"]'));
+}
+
+function applyTheme(theme) {
+  state.theme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.theme === theme);
+  });
+  setTimeout(() => { drawDashboardCharts(); if (document.getElementById('pageTrend').classList.contains('active')) drawTrendCharts(); }, 100);
+  try { localStorage.setItem('oil_theme', theme); } catch(e) {}
+}
+
+function applyLang(lang) {
+  state.lang = lang;
+  document.documentElement.setAttribute('data-lang', lang);
+  document.querySelectorAll('.lang-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.lang === lang);
+  });
+  applyI18n();
+  if (state.currentData) {
+    renderCards(state.currentData);
+    renderTable();
+  }
+  drawDashboardCharts();
+  if (document.getElementById('pageTrend').classList.contains('active')) drawTrendCharts();
+  try { localStorage.setItem('oil_lang', lang); } catch(e) {}
+}
+
+function toggleParticles() {
+  state.particlesEnabled = !state.particlesEnabled;
+  document.getElementById('toggleParticles').classList.toggle('on', state.particlesEnabled);
+}
+function toggleOilAnim() {
+  state.oilAnimEnabled = !state.oilAnimEnabled;
+  document.getElementById('toggleOil').classList.toggle('on', state.oilAnimEnabled);
+  if (state.currentData) renderCards(state.currentData);
+}
+function toggleBoilAnim() {
+  state.boilAnimEnabled = !state.boilAnimEnabled;
+  document.getElementById('toggleBoil').classList.toggle('on', state.boilAnimEnabled);
+  if (state.currentData) renderCards(state.currentData);
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('navTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+}
+
+// ============================================================
+// DATA REFRESH
+// ============================================================
+async function refreshData() {
+  if (!state.token) await apiLogin();
+  const latest = await apiFetchLatest();
+
+  if (latest && latest.level1 != null) {
+    state.currentData = latest;
+    const exists = state.historyData.some(d => d.timestamp === latest.timestamp);
+    if (!exists) {
+      state.historyData.push({ ...latest, alarmLevel: 0 });
+      if (state.historyData.length > 60) state.historyData.shift();
+    }
+  } else if (!state.currentData) {
+    state.historyData = genMockHistory(14);
+    state.currentData = { ...state.historyData[state.historyData.length - 1] };
+  }
+
+  const alarm = checkAlarm(state.currentData);
+  renderCards(state.currentData);
+  updateStatus(alarm);
+  renderTable();
+  drawDashboardCharts();
+
+  document.getElementById('dataTimeLabel').textContent = state.currentData.timestamp;
+  document.getElementById('footerUpdate').textContent = t('lastUpdate').replace('--', new Date().toLocaleString('zh-CN', { hour12: false }));
+}
+
+// ============================================================
+// CHART TOOLTIP
+// ============================================================
+function showChartTooltip(canvasId, clientX, clientY) {
+  const meta = chartMeta[canvasId];
+  if (!meta) return;
+  const canvas = document.getElementById(canvasId);
+  const rect = canvas.getBoundingClientRect();
+  const mx = clientX - rect.left;
+  const my = clientY - rect.top;
+  const { datasets, xLabels, pad, cW, cH, minV, maxV, xStep } = meta;
+
+  // Find nearest data index by x
+  let nearIdx = -1, nearDist = Infinity;
+  for (let i = 0; i < xLabels.length; i++) {
+    const px = pad.left + i * xStep;
+    const d = Math.abs(mx - px);
+    if (d < nearDist) { nearDist = d; nearIdx = i; }
+  }
+  if (nearIdx < 0 || nearDist > 30) { hideChartTooltip(); return; }
+
+  // Check if any dataset has a point near enough in y
+  let found = false;
+  for (const ds of datasets) {
+    const v = ds.data[nearIdx];
+    if (v == null) continue;
+    const py = pad.top + cH * (1 - (v - minV) / (maxV - minV));
+    if (Math.abs(my - py) < 25) { found = true; break; }
+  }
+  if (!found) { hideChartTooltip(); return; }
+
+  // Build tooltip content
+  const tooltip = document.getElementById('chartTooltip');
+  let html = `<div class="tt-date">${xLabels[nearIdx]}</div>`;
+  datasets.forEach(ds => {
+    const v = ds.data[nearIdx];
+    if (v == null) return;
+    html += `<div class="tt-row">
+      <span class="tt-dot" style="background:${ds.color}"></span>
+      <span class="tt-label">${ds.label || ''}</span>
+      <span class="tt-val" style="color:${ds.color}">${v}</span>
+    </div>`;
+  });
+  tooltip.innerHTML = html;
+
+  // Position tooltip
+  const tw = tooltip.offsetWidth || 160;
+  const th = tooltip.offsetHeight || 80;
+  let tx = clientX + 14;
+  let ty = clientY - th / 2;
+  if (tx + tw > window.innerWidth - 10) tx = clientX - tw - 14;
+  if (ty < 10) ty = 10;
+  if (ty + th > window.innerHeight - 10) ty = window.innerHeight - th - 10;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top = ty + 'px';
+  tooltip.classList.add('visible');
+}
+
+function hideChartTooltip() {
+  document.getElementById('chartTooltip').classList.remove('visible');
+}
+
+function initChartTooltips() {
+  const canvasIds = ['chartParticle', 'chartTemp', 'trendParticleFull', 'trendTempFull'];
+  canvasIds.forEach(id => {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    canvas.addEventListener('mousemove', e => showChartTooltip(id, e.clientX, e.clientY));
+    canvas.addEventListener('mouseleave', hideChartTooltip);
+  });
+}
+
+// ============================================================
+// BRIGHTNESS & CONTRAST
+// ============================================================
+function applyBrightness(val) {
+  state.brightness = parseInt(val);
+  document.getElementById('valBrightness').textContent = val + '%';
+  applyDisplayFilters();
+  try { localStorage.setItem('oil_brightness', val); } catch(e) {}
+}
+
+function applyContrast(val) {
+  state.contrast = parseInt(val);
+  document.getElementById('valContrast').textContent = val + '%';
+  applyDisplayFilters();
+  try { localStorage.setItem('oil_contrast', val); } catch(e) {}
+}
+
+function applyDisplayFilters() {
+  document.body.style.filter = `brightness(${state.brightness}%) contrast(${state.contrast}%)`;
+}
+
+// ============================================================
+// RING CHART DRAWING
+// ============================================================
+function drawRingChart(canvasId, percent, color, bgColor) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const size = 120;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.scale(dpr, dpr);
+
+  const cx = size / 2, cy = size / 2, r = 46, lw = 10;
+  const startAngle = -Math.PI / 2;
+  const endAngle = startAngle + (Math.PI * 2 * Math.min(percent, 100) / 100);
+
+  // Background ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.strokeStyle = bgColor || 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Value ring
+  if (percent > 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Glow effect
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw + 4;
+    ctx.globalAlpha = 0.15;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function renderOverviewRings() {
+  // Generate device status data from history
+  const hist = state.historyData;
+  const total = hist.length || 1;
+  let onlineCount = 0, alarmCount = 0, healthCount = 0;
+  hist.forEach(d => {
+    if (d.level1 != null && d.level1 >= 0) onlineCount++;
+    const a = checkAlarm(d);
+    if (a.level > 0) alarmCount++;
+    if (a.level === 0 && d.level1 != null && d.level1 >= 0) healthCount++;
+  });
+  const onlineRate = Math.round(onlineCount / total * 100);
+  const offlineRate = 100 - onlineRate;
+  const alarmRate = Math.round(alarmCount / total * 100);
+  const healthRate = Math.round(healthCount / total * 100);
+
+  drawRingChart('ringOnline', onlineRate, '#00e676');
+  drawRingChart('ringOffline', offlineRate, '#ff3b5c');
+  drawRingChart('ringAlarm', alarmRate, '#ffaa00');
+  drawRingChart('ringHealth', healthRate, '#00d4ff');
+
+  document.getElementById('valOnline').textContent = onlineRate;
+  document.getElementById('valOffline').textContent = offlineRate;
+  document.getElementById('valAlarm').textContent = alarmRate;
+  document.getElementById('valHealth').textContent = healthRate;
+}
+
+// ============================================================
+// ALARM DATA
+// ============================================================
+let allAlarms = [];
+let filteredAlarms = [];
+let alarmPage = 1;
+const ALARMS_PER_PAGE = 10;
+
+function genMockAlarms() {
+  const alarms = [];
+  const now = new Date();
+  const types = ['particle', 'temperature', 'water'];
+  const statuses = ['pending', 'confirmed', 'resolved'];
+  const typeLabels = { particle: 'alarmTypeParticle', temperature: 'alarmTypeTemp', water: 'alarmTypeWater' };
+
+  for (let i = 0; i < 35; i++) {
+    const d = new Date(now - Math.random() * 30 * 24 * 3600 * 1000);
+    const type = types[Math.floor(Math.random() * types.length)];
+    const level = Math.random() > 0.4 ? 1 : 2;
+    let value = '';
+    if (type === 'particle') value = (15 + Math.random() * 15).toFixed(1) + ' pcs/mL';
+    else if (type === 'temperature') value = (50 + Math.random() * 20).toFixed(1) + ' ℃';
+    else value = (120 + Math.random() * 200).toFixed(1) + ' ppm';
+
+    alarms.push({
+      id: i + 1,
+      time: d.toISOString().replace('T', ' ').substring(0, 19),
+      type, typeLabel: typeLabels[type],
+      level,
+      value,
+      status: statuses[Math.floor(Math.random() * (level === 2 ? 2 : 3))],
+      date: d
+    });
+  }
+  alarms.sort((a, b) => b.date - a.date);
+  return alarms;
+}
+
+function filterAlarms() {
+  const type = document.getElementById('alarmFilterType').value;
+  const level = document.getElementById('alarmFilterLevel').value;
+  const status = document.getElementById('alarmFilterStatus').value;
+  const range = parseInt(document.getElementById('alarmFilterRange').value);
+
+  const cutoff = new Date(Date.now() - range * 24 * 3600 * 1000);
+
+  filteredAlarms = allAlarms.filter(a => {
+    if (type !== 'all' && a.type !== type) return false;
+    if (level !== 'all' && a.level !== parseInt(level)) return false;
+    if (status !== 'all' && a.status !== status) return false;
+    if (a.date < cutoff) return false;
+    return true;
+  });
+
+  alarmPage = 1;
+  renderAlarmSummary();
+  renderAlarmTable();
+}
+
+function renderAlarmSummary() {
+  document.getElementById('alarmTotal').textContent = filteredAlarms.length;
+  document.getElementById('alarmWarnCount').textContent = filteredAlarms.filter(a => a.level === 1).length;
+  document.getElementById('alarmCritCount').textContent = filteredAlarms.filter(a => a.level === 2).length;
+  document.getElementById('alarmResolvedCount').textContent = filteredAlarms.filter(a => a.status === 'resolved').length;
+}
+
+function renderAlarmTable() {
+  const tbody = document.getElementById('alarmTableBody');
+  const start = (alarmPage - 1) * ALARMS_PER_PAGE;
+  const pageData = filteredAlarms.slice(start, start + ALARMS_PER_PAGE);
+
+  if (!pageData.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:24px">${t('noData')}</td></tr>`;
+    document.getElementById('alarmPagination').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = pageData.map(a => {
+    const levelClass = a.level === 2 ? 'crit' : 'warn';
+    const levelText = a.level === 2 ? t('alarmLevelCrit') : t('alarmLevelWarn');
+    const statusClass = a.status === 'resolved' ? 'resolved' : a.status === 'confirmed' ? 'confirmed' : 'pending';
+    const statusText = t('alarmStatus' + a.status.charAt(0).toUpperCase() + a.status.slice(1));
+    const typeText = t(a.typeLabel);
+
+    let actions = '';
+    if (a.status === 'pending') {
+      actions = `<button class="alarm-action-btn" onclick="confirmAlarm(${a.id})">${t('alarmConfirm')}</button>`;
+    } else if (a.status === 'confirmed') {
+      actions = `<button class="alarm-action-btn resolve" onclick="resolveAlarm(${a.id})">${t('alarmResolve')}</button>`;
+    } else {
+      actions = '<span style="color:var(--text-dim)">--</span>';
+    }
+
+    return `<tr>
+      <td>${a.time}</td>
+      <td>${typeText}</td>
+      <td><span class="alarm-level-badge ${levelClass}">${levelText}</span></td>
+      <td style="font-family:var(--font-mono);font-size:12px">${a.value}</td>
+      <td><span class="alarm-level-badge ${statusClass}">${statusText}</span></td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  renderAlarmPagination();
+}
+
+function renderAlarmPagination() {
+  const totalPages = Math.ceil(filteredAlarms.length / ALARMS_PER_PAGE);
+  if (totalPages <= 1) { document.getElementById('alarmPagination').innerHTML = ''; return; }
+
+  let html = '';
+  html += `<button class="page-btn" ${alarmPage <= 1 ? 'disabled' : ''} onclick="goAlarmPage(${alarmPage - 1})">‹</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (totalPages > 7 && i > 2 && i < totalPages - 1 && Math.abs(i - alarmPage) > 1) {
+      if (i === 3 || i === totalPages - 2) html += '<span class="page-dots">…</span>';
+      continue;
+    }
+    html += `<button class="page-btn ${i === alarmPage ? 'active' : ''}" onclick="goAlarmPage(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" ${alarmPage >= totalPages ? 'disabled' : ''} onclick="goAlarmPage(${alarmPage + 1})">›</button>`;
+  document.getElementById('alarmPagination').innerHTML = html;
+}
+
+function goAlarmPage(p) {
+  const totalPages = Math.ceil(filteredAlarms.length / ALARMS_PER_PAGE);
+  if (p < 1 || p > totalPages) return;
+  alarmPage = p;
+  renderAlarmTable();
+}
+
+function confirmAlarm(id) {
+  const a = allAlarms.find(x => x.id === id);
+  if (a) a.status = 'confirmed';
+  filterAlarms();
+}
+
+function resolveAlarm(id) {
+  const a = allAlarms.find(x => x.id === id);
+  if (a) a.status = 'resolved';
+  filterAlarms();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  try {
+    const savedTheme = localStorage.getItem('oil_theme');
+    if (savedTheme) applyTheme(savedTheme);
+    const savedLang = localStorage.getItem('oil_lang');
+    if (savedLang) applyLang(savedLang);
+    const savedBrightness = localStorage.getItem('oil_brightness');
+    if (savedBrightness) {
+      state.brightness = parseInt(savedBrightness);
+      document.getElementById('sliderBrightness').value = savedBrightness;
+      document.getElementById('valBrightness').textContent = savedBrightness + '%';
+    }
+    const savedContrast = localStorage.getItem('oil_contrast');
+    if (savedContrast) {
+      state.contrast = parseInt(savedContrast);
+      document.getElementById('sliderContrast').value = savedContrast;
+      document.getElementById('valContrast').textContent = savedContrast + '%';
+    }
+    applyDisplayFilters();
+  } catch(e) {}
+
+  applyI18n();
+  initParticles();
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  state.historyData = genMockHistory(14);
+  state.currentData = { ...state.historyData[state.historyData.length - 1] };
+
+  await refreshData();
+  initChartTooltips();
+
+  window.addEventListener('resize', () => {
+    drawDashboardCharts();
+    if (document.getElementById('pageTrend').classList.contains('active')) drawTrendCharts();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
