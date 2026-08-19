@@ -1235,6 +1235,88 @@ body {
   font-size: 11px; color: var(--text-secondary);
   margin-top: 6px; font-weight: 500;
 }
+
+/* ============================================================
+   TREND WARNING PANEL
+   ============================================================ */
+.trend-warning-panel {
+  background: linear-gradient(135deg, rgba(255,170,0,0.08), rgba(255,59,92,0.06));
+  border: 1px solid rgba(255,170,0,0.3);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+  animation: trendPulse 3s ease-in-out infinite;
+}
+@keyframes trendPulse {
+  0%, 100% { border-color: rgba(255,170,0,0.3); }
+  50% { border-color: rgba(255,170,0,0.6); }
+}
+.trend-warning-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--warning), var(--danger), var(--warning));
+  background-size: 200% 100%;
+  animation: trendBar 2s linear infinite;
+}
+@keyframes trendBar {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+.trend-warning-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.trend-warning-icon {
+  font-size: 20px; color: var(--warning);
+  animation: iconBlink 1.5s ease-in-out infinite;
+}
+@keyframes iconBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.trend-warning-title {
+  font-size: 15px; font-weight: 700; color: var(--warning);
+  letter-spacing: 0.5px;
+}
+.trend-warning-badge {
+  font-size: 10px; font-weight: 600;
+  background: rgba(255,170,0,0.15);
+  color: var(--warning);
+  padding: 2px 8px; border-radius: 10px;
+  border: 1px solid rgba(255,170,0,0.3);
+}
+.trend-warning-list {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 12px;
+}
+.trend-warning-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  border-left: 3px solid var(--warning);
+}
+.trend-warning-item.crit {
+  border-left-color: var(--danger);
+}
+.trend-warn-metric {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+}
+.trend-warn-detail {
+  font-size: 12px; color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+.trend-warn-arrow {
+  color: var(--danger); font-size: 14px; font-weight: 700;
+  margin: 0 6px;
+}
+.trend-warning-footer {
+  font-size: 11px; color: var(--text-secondary);
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,170,0,0.15);
+  line-height: 1.5;
+}
 </style>
 </head>
 <body>
@@ -1283,6 +1365,17 @@ body {
       <div class="section-sub" id="dataTimeLabel">--</div>
     </div>
     <div class="cards-grid" id="cardsGrid"></div>
+
+    <!-- Trend Warning Panel -->
+    <div class="trend-warning-panel animate-in" id="trendWarningPanel" style="display:none">
+      <div class="trend-warning-header">
+        <span class="trend-warning-icon">&#9888;</span>
+        <span class="trend-warning-title" data-i18n="trendWarnTitle">趋势预警</span>
+        <span class="trend-warning-badge" data-i18n="trendWarnBadge">连续7天上升</span>
+      </div>
+      <div class="trend-warning-list" id="trendWarningList"></div>
+      <div class="trend-warning-footer" data-i18n="trendWarnFooter">指标持续上升可能预示油液劣化加速，建议提前安排换油或检修</div>
+    </div>
 
     <div class="glow-divider"></div>
 
@@ -1655,8 +1748,8 @@ const I18N = {
     about: '关于', aboutText: '冲压车间压机润滑油智能监测系统 v2.0', aboutOil: '长城100号润滑油 · ISO 4406标准',
     tabDashboard: '监控台', tabTrend: '趋势', tabSettings: '设置',
     statusGood: '正常', statusWarn: '预警', statusBad: '严重',
-    cardL1: '等级1 (>4μm)', cardL2: '等级2 (>6μm)', cardL3: '等级3 (>14μm)',
-    cardL4: '等级4 (>21μm)', cardL5: '等级5 (>38μm)', cardTemp: '油温', cardWater: '水含量', cardActivity: '水活性',
+    cardL1: '等级1 (>4um)', cardL2: '等级2 (>6um)', cardL3: '等级3 (>14um)',
+    cardL4: '等级4 (>21um)', cardL5: '等级5 (>38um)', cardTemp: '油温', cardWater: '水含量', cardActivity: '水活性',
     unitPc: '个/mL', unitC: '℃', unitPpm: 'ppm', unitAw: 'aw',
     noData: '暂无数据', coverageDays: '覆盖天数', alarmCount: '报警次数',
     avgL1: 'L1均值', tempRange: '温度范围', avgWater: '水含量均值',
@@ -1673,7 +1766,8 @@ const I18N = {
     alarmTypeParticle: '颗粒度', alarmTypeTemp: '温度', alarmTypeWater: '水分',
     alarmLevelWarn: '预警', alarmLevelCrit: '严重',
     alarmStatusPending: '待处理', alarmStatusConfirmed: '已确认', alarmStatusResolved: '已解决',
-    deviceStatus: '设备状态', deviceOnline: '在线', deviceOffline: '离线', deviceAlarm: '报警中', deviceHealth: '健康'
+    deviceStatus: '设备状态', deviceOnline: '在线', deviceOffline: '离线', deviceAlarm: '报警中', deviceHealth: '健康',
+    trendWarnTitle: '趋势预警', trendWarnBadge: '连续7天上升', trendWarnFooter: '指标持续上升可能预示油液劣化加速，建议提前安排换油或检修'
   },
   en: {
     navTitle: 'Oil Intelligence Monitor', statusNormal: 'Normal', statusWarning: 'Warning', statusCritical: 'Critical',
@@ -1691,8 +1785,8 @@ const I18N = {
     about: 'About', aboutText: 'Press Oil Smart Monitoring System v2.0', aboutOil: 'Great Wall 100# Oil · ISO 4406',
     tabDashboard: 'Dashboard', tabTrend: 'Trend', tabSettings: 'Settings',
     statusGood: 'Normal', statusWarn: 'Warning', statusBad: 'Critical',
-    cardL1: 'Level 1 (>4μm)', cardL2: 'Level 2 (>6μm)', cardL3: 'Level 3 (>14μm)',
-    cardL4: 'Level 4 (>21μm)', cardL5: 'Level 5 (>38μm)', cardTemp: 'Oil Temp', cardWater: 'Water Content', cardActivity: 'Water Activity',
+    cardL1: 'Level 1 (>4um)', cardL2: 'Level 2 (>6um)', cardL3: 'Level 3 (>14um)',
+    cardL4: 'Level 4 (>21um)', cardL5: 'Level 5 (>38um)', cardTemp: 'Oil Temp', cardWater: 'Water Content', cardActivity: 'Water Activity',
     unitPc: 'pcs/mL', unitC: '℃', unitPpm: 'ppm', unitAw: 'aw',
     noData: 'No Data', coverageDays: 'Days', alarmCount: 'Alarms',
     avgL1: 'L1 Avg', tempRange: 'Temp Range', avgWater: 'Water Avg',
@@ -1709,7 +1803,8 @@ const I18N = {
     alarmTypeParticle: 'Particle', alarmTypeTemp: 'Temperature', alarmTypeWater: 'Moisture',
     alarmLevelWarn: 'Warning', alarmLevelCrit: 'Critical',
     alarmStatusPending: 'Pending', alarmStatusConfirmed: 'Confirmed', alarmStatusResolved: 'Resolved',
-    deviceStatus: 'Device Status', deviceOnline: 'Online', deviceOffline: 'Offline', deviceAlarm: 'Alarming', deviceHealth: 'Healthy'
+    deviceStatus: 'Device Status', deviceOnline: 'Online', deviceOffline: 'Offline', deviceAlarm: 'Alarming', deviceHealth: 'Healthy',
+    trendWarnTitle: 'Trend Warning', trendWarnBadge: '7-day rising', trendWarnFooter: 'Sustained rising trends may indicate accelerated oil degradation. Consider scheduling oil change or maintenance.'
   }
 };
 
@@ -1768,6 +1863,10 @@ function genMockHistory(days) {
     const d = new Date(now - i * 24 * 3600 * 1000);
     const ts = d.toISOString().replace('T',' ').substring(0,19);
     const base = 10 + Math.sin(i * 0.5) * 3;
+    // 最近7天温度和水分呈确定性上升趋势（用于演示趋势预警）
+    const dayIdx = days - 1 - i;
+    const inLast7 = dayIdx >= (days - 7);
+    const trendDay = inLast7 ? dayIdx - (days - 7) : -1;
     data.push({
       timestamp: ts,
       level1: +(base + Math.random() * 4).toFixed(1),
@@ -1775,8 +1874,8 @@ function genMockHistory(days) {
       level3: +(base - 2 + Math.random() * 3).toFixed(1),
       level4: +(base - 3 + Math.random() * 2).toFixed(1),
       level5: +(base - 4 + Math.random() * 2).toFixed(1),
-      temperature: +(35 + Math.sin(i * 0.3) * 5 + Math.random() * 3).toFixed(1),
-      waterContent: +(85 + Math.random() * 20).toFixed(1),
+      temperature: inLast7 ? +(36 + trendDay * 1.2).toFixed(1) : +(35 + Math.sin(i * 0.3) * 5 + Math.random() * 3).toFixed(1),
+      waterContent: inLast7 ? +(90 + trendDay * 8).toFixed(1) : +(85 + Math.random() * 20).toFixed(1),
       waterActivity: +(0.52 + Math.random() * 0.08).toFixed(2),
       alarmLevel: 0
     });
@@ -1803,6 +1902,79 @@ function checkAlarm(d) {
   if (d.waterContent != null && d.waterContent >= T.waterContent.warning) level = Math.max(level,1);
   if (d.waterActivity != null && d.waterActivity >= T.waterActivity.warning) level = Math.max(level,1);
   return { level, msgs };
+}
+
+// ============================================================
+// WEEKLY TREND CHECK (连续7天上升趋势检测)
+// ============================================================
+function checkWeeklyTrend() {
+  const hist = state.historyData;
+  if (hist.length < 5) return null;
+
+  // 按天分组，取每天最后一条记录
+  const daily = {};
+  hist.forEach(r => {
+    const day = (r.timestamp || '').substring(0, 10);
+    if (day) daily[day] = r;
+  });
+  const sortedDays = Object.keys(daily).sort().slice(-7);
+  if (sortedDays.length < 5) return null;
+
+  const metrics = {
+    level1: { name: '颗粒度 L1(>4um)', unit: '个/mL', fmt: 1 },
+    level2: { name: '颗粒度 L2(>6um)', unit: '个/mL', fmt: 1 },
+    level3: { name: '颗粒度 L3(>14um)', unit: '个/mL', fmt: 1 },
+    level4: { name: '颗粒度 L4(>21um)', unit: '个/mL', fmt: 1 },
+    level5: { name: '颗粒度 L5(>38um)', unit: '个/mL', fmt: 1 },
+    temperature: { name: '温度', unit: '℃', fmt: 1 },
+    waterContent: { name: '水含量', unit: 'ppm', fmt: 1 },
+    waterActivity: { name: '水活性', unit: 'aw', fmt: 3 }
+  };
+
+  const trendItems = [];
+  for (const [key, info] of Object.entries(metrics)) {
+    const values = sortedDays.map(d => parseFloat(daily[d][key]) || 0);
+    const nonZero = values.filter(v => v > 0);
+    if (nonZero.length < 3) continue;
+    // 检查是否连续上升
+    let allRising = true;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i] <= values[i - 1]) { allRising = false; break; }
+    }
+    if (allRising) {
+      const first = values[0].toFixed(info.fmt);
+      const last = values[values.length - 1].toFixed(info.fmt);
+      trendItems.push({
+        name: info.name, unit: info.unit,
+        days: values.length, first, last,
+        key
+      });
+    }
+  }
+  return trendItems.length > 0 ? trendItems : null;
+}
+
+function renderTrendWarning() {
+  const panel = document.getElementById('trendWarningPanel');
+  const list = document.getElementById('trendWarningList');
+  const trends = checkWeeklyTrend();
+
+  if (!trends) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  list.innerHTML = trends.map(item => {
+    const isCrit = item.key.startsWith('level') && parseFloat(item.last) >= CFG.thresholds.particle.warning;
+    return `<div class="trend-warning-item ${isCrit ? 'crit' : ''}">
+      <span class="trend-warn-metric">${item.name}</span>
+      <span class="trend-warn-detail">
+        ${item.first}<span class="trend-warn-arrow">&rarr;</span>${item.last} ${item.unit}
+        &nbsp;(${item.days}天连续上升)
+      </span>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -2344,6 +2516,7 @@ async function refreshData() {
   renderCards(state.currentData);
   updateStatus(alarm);
   renderTable();
+  renderTrendWarning();
   drawDashboardCharts();
 
   document.getElementById('dataTimeLabel').textContent = state.currentData.timestamp;

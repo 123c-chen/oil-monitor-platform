@@ -207,7 +207,7 @@ function generateMockAlarms(query = {}) {
     water: '水含量超标',
     activity: '水活性过高'
   };
-  const channels = ['L1(>4μm)', 'L2(>6μm)', 'L3(>14μm)', 'L4(>21μm)', 'L5(>38μm)'];
+  const channels = ['L1(>4um)', 'L2(>6um)', 'L3(>14um)', 'L4(>21um)', 'L5(>38um)'];
 
   // 生成过去30天的模拟报警记录
   for (let i = 0; i < 35; i++) {
@@ -543,7 +543,7 @@ app.get('/api/notify/test', async (req, res) => {
       '> **时间：** ' + new Date().toISOString().replace('T', ' ').substring(0, 19),
       '> **设备：** 油液清洁度检测仪',
       '---',
-      '> **颗粒度超标** (L1(>4μm))：28.5 个/mL',
+      '> **颗粒度超标** (L1(>4um))：28.5 个/mL',
       '> **温度过高**：67.3 ℃',
       '---',
       '> 请及时处理，登录系统查看详情'
