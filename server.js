@@ -22,6 +22,9 @@ const API_BASE = 'https://mds.bodazl.com:8090';
 const API_USER = 'mds26061103';
 const API_PASS = '123456';
 const API_DEVICE = 56857;
+const API_SDID = 18806;        // 从设备ID
+const API_GROUP_PID = 23891;   // 项目组ID
+const API_DSIDS = '361240,361241,361242,361243,361244,361245,361246,361247';
 
 let apiToken = null;
 let tokenExpiry = 0;
@@ -103,14 +106,35 @@ app.get('/api/alarms', async (req, res) => {
   try {
     const token = await ensureToken();
     if (!token) {
-      // 无API访问时返回模拟数据
-      return res.json(generateMockAlarms(req.query));
+      return res.json({ code: 0, data: [] });
     }
 
     // 尝试从API获取历史数据并生成报警记录
-    const result = await apiRequest('GET', `/api/v1/device/dps?deviceId=${API_DEVICE}&pageSize=100`);
+    // 使用 hisdps 获取最近7天数据
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+    const fmt = d => d.toISOString().replace('T', ' ').substring(0, 19);
+    const hisUrl = `/api/v1/device/hisdps?pid=${API_GROUP_PID}&did=${API_DEVICE}&sdid=${API_SDID}&dsids=${API_DSIDS}&start=${fmt(weekAgo)}&end=${fmt(now)}&order=desc`;
+    const result = await apiRequest('GET', hisUrl);
 
-    if (result.code === 0 && result.data?.rows) {
+    if (result.code === 0 && result.data?.dss) {
+      // 将 hisdps 响应转换为记录数组
+      const DSID_MAP = {361240:'d_1',361241:'d_2',361242:'d_3',361243:'d_4',361244:'d_5',361245:'d_6',361246:'d_7',361247:'d_8'};
+      const tsMap = {};
+      for (const ds of result.data.dss) {
+        const dsName = DSID_MAP[ds.id] || ds.name;
+        for (const dp of (ds.dps || [])) {
+          if (!tsMap[dp.at]) tsMap[dp.at] = {};
+          tsMap[dp.at][dsName] = dp.value;
+        }
+      }
+      const records = Object.entries(tsMap).sort((a, b) => b[0] - a[0]).map(([at, vals]) => ({
+        timestamp: new Date(parseInt(at) * 1000).toISOString().replace('T', ' ').substring(0, 19),
+        level1: parseFloat(vals.d_1), level2: parseFloat(vals.d_2),
+        level3: parseFloat(vals.d_3), level4: parseFloat(vals.d_4), level5: parseFloat(vals.d_5),
+        temperature: parseFloat(vals.d_6), waterContent: parseFloat(vals.d_7), waterActivity: parseFloat(vals.d_8)
+      }));
+
       const alarms = [];
       const thresholds = {
         particle: { warning: 18, critical: 25 },
@@ -119,22 +143,7 @@ app.get('/api/alarms', async (req, res) => {
         waterActivity: { warning: 0.7, critical: 0.85 }
       };
 
-      result.data.rows.forEach(row => {
-        const m = {};
-        (row.lastdp || []).forEach(dp => m[dp.name] = dp);
-
-        const record = {
-          timestamp: m.d_1?.at || row.createTime,
-          level1: parseFloat(m.d_1?.value),
-          level2: parseFloat(m.d_2?.value),
-          level3: parseFloat(m.d_3?.value),
-          level4: parseFloat(m.d_4?.value),
-          level5: parseFloat(m.d_5?.value),
-          temperature: parseFloat(m.d_6?.value),
-          waterContent: parseFloat(m.d_7?.value),
-          waterActivity: parseFloat(m.d_8?.value)
-        };
-
+      for (const record of records) {
         // 检查报警条件
         const alarmTypes = [];
         let maxLevel = 0;
@@ -185,93 +194,16 @@ app.get('/api/alarms', async (req, res) => {
             imei: '863304084381278'
           });
         }
-      });
+      }
 
       return res.json({ code: 0, data: alarms });
     }
 
-    res.json(generateMockAlarms(req.query));
+    res.json({ code: 0, data: [] });
   } catch (e) {
-    res.json(generateMockAlarms(req.query));
+    res.json({ code: 0, data: [] });
   }
 });
-
-// 模拟报警数据生成
-function generateMockAlarms(query = {}) {
-  const alarms = [];
-  const now = new Date();
-  const types = ['particle', 'temperature', 'water', 'activity'];
-  const typeNames = {
-    particle: '颗粒度超标',
-    temperature: '温度过高',
-    water: '水含量超标',
-    activity: '水活性过高'
-  };
-  const channels = ['L1(>4um)', 'L2(>6um)', 'L3(>14um)', 'L4(>21um)', 'L5(>38um)'];
-
-  // 生成过去30天的模拟报警记录
-  for (let i = 0; i < 35; i++) {
-    const daysAgo = Math.floor(Math.random() * 30);
-    const hoursAgo = Math.floor(Math.random() * 24);
-    const d = new Date(now - daysAgo * 86400000 - hoursAgo * 3600000);
-    const ts = d.toISOString().replace('T', ' ').substring(0, 19);
-
-    const type = types[Math.floor(Math.random() * types.length)];
-    const level = Math.random() > 0.3 ? 1 : 2;
-    const channelIdx = Math.floor(Math.random() * channels.length);
-
-    let value;
-    switch (type) {
-      case 'particle': value = level === 2 ? 25 + Math.random() * 10 : 18 + Math.random() * 7; break;
-      case 'temperature': value = level === 2 ? 65 + Math.random() * 10 : 55 + Math.random() * 10; break;
-      case 'water': value = level === 2 ? 300 + Math.random() * 100 : 150 + Math.random() * 150; break;
-      case 'activity': value = level === 2 ? 0.85 + Math.random() * 0.1 : 0.7 + Math.random() * 0.15; break;
-    }
-
-    alarms.push({
-      id: `ALM-${1000 + i}`,
-      timestamp: ts,
-      level,
-      type,
-      typeName: typeNames[type],
-      channel: type === 'particle' ? channels[channelIdx] : null,
-      value: +value.toFixed(type === 'activity' ? 2 : 1),
-      unit: type === 'particle' ? '个/mL' : type === 'temperature' ? '℃' : type === 'water' ? 'ppm' : 'aw',
-      deviceId: 56857,
-      deviceName: '油液清洁度检测仪',
-      imei: '863304084381278',
-      status: Math.random() > 0.3 ? 'resolved' : 'active'
-    });
-  }
-
-  alarms.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-
-  // 应用筛选
-  let filtered = alarms;
-  if (query.type && query.type !== 'all') {
-    filtered = filtered.filter(a => a.type === query.type);
-  }
-  if (query.level && query.level !== 'all') {
-    filtered = filtered.filter(a => a.level === parseInt(query.level));
-  }
-  if (query.status && query.status !== 'all') {
-    filtered = filtered.filter(a => a.status === query.status);
-  }
-  if (query.from) {
-    filtered = filtered.filter(a => a.timestamp >= query.from);
-  }
-  if (query.to) {
-    filtered = filtered.filter(a => a.timestamp <= query.to + ' 23:59:59');
-  }
-
-  // 分页
-  const page = parseInt(query.page) || 1;
-  const pageSize = parseInt(query.pageSize) || 10;
-  const total = filtered.length;
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
-
-  return { code: 0, data: paged, total, page, pageSize };
-}
 
 // ============================================================
 // 设备状态 API
@@ -281,21 +213,22 @@ app.get('/api/device-status', async (req, res) => {
     const token = await ensureToken();
     if (!token) {
       return res.json({
-        code: 0,
+        code: -1,
+        msg: '无法连接迈德施平台，设备状态未知',
         data: {
           total: 1,
-          online: 1,
+          online: 0,
           offline: 0,
           alarm: 0,
-          onlineRate: 100,
+          onlineRate: 0,
           offlineRate: 0,
           alarmRate: 0,
           devices: [{
             id: 56857,
             name: '油液清洁度检测仪',
             imei: '863304084381278',
-            status: 'online',
-            lastReport: new Date().toISOString().replace('T', ' ').substring(0, 19)
+            status: 'unknown',
+            lastReport: null
           }]
         }
       });
@@ -327,13 +260,165 @@ app.get('/api/device-status', async (req, res) => {
     }
   } catch (e) {
     res.json({
-      code: 0,
+      code: -1,
+      msg: '获取设备状态异常',
       data: {
-        total: 1, online: 1, offline: 0, alarm: 0,
-        onlineRate: 100, offlineRate: 0, alarmRate: 0,
-        devices: [{ id: 56857, name: '油液清洁度检测仪', imei: '863304084381278', status: 'online' }]
+        total: 1, online: 0, offline: 0, alarm: 0,
+        onlineRate: 0, offlineRate: 0, alarmRate: 0,
+        devices: [{ id: 56857, name: '油液清洁度检测仪', imei: '863304084381278', status: 'unknown', lastReport: null }]
       }
     });
+  }
+});
+
+// ============================================================
+// 历史数据 API - 从迈德施获取历史数据并聚合
+// ============================================================
+app.get('/api/history', async (req, res) => {
+  try {
+    const token = await ensureToken();
+    if (!token) {
+      return res.json({ code: -1, msg: '无法连接迈德施平台' });
+    }
+
+    const { start, end, dataPoint, algorithm, interval } = req.query;
+    const startDate = start ? new Date(start) : new Date(Date.now() - 7 * 24 * 3600 * 1000);
+    const endDate = end ? new Date(end) : new Date();
+    const dp = dataPoint || 'temperature';
+    const algo = algorithm || 'raw';
+    const intervalMin = parseInt(interval) || 5;
+
+    const fmt = d => d.toISOString().replace('T', ' ').substring(0, 19);
+
+    // 数据点名称→ds_id映射
+    const DP_TO_DSID = {
+      level1: '361240', level2: '361241', level3: '361242',
+      level4: '361243', level5: '361244',
+      temperature: '361245', waterContent: '361246', waterActivity: '361247'
+    };
+    const dsid = DP_TO_DSID[dp] || '361245';
+
+    // 从MDS获取历史数据（支持cursor分页）
+    const rawPoints = [];
+    let cursor = 0;
+    const pageSize = 2000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const hisUrl = `/api/v1/device/hisdps?pid=${API_GROUP_PID}&did=${API_DEVICE}&sdid=${API_SDID}&dsids=${dsid}&start=${fmt(startDate)}&end=${fmt(endDate)}&order=asc&cursor=${cursor}`;
+      const result = await apiRequest('GET', hisUrl);
+
+      if (result.code !== 0 || !result.data?.dss?.length) {
+        break;
+      }
+
+      for (const ds of result.data.dss) {
+        for (const dpItem of (ds.dps || [])) {
+          const ts = new Date(parseInt(dpItem.at) * 1000);
+          const val = parseFloat(dpItem.value);
+          if (!isNaN(val) && val >= 0) {
+            rawPoints.push({ ts, val });
+          }
+        }
+      }
+
+      // Check if there are more pages
+      if (result.data.cursor && result.data.cursor > 0 && result.data.dss[0]?.dps?.length >= pageSize) {
+        cursor = result.data.cursor;
+      } else {
+        hasMore = false;
+      }
+
+      // Safety limit: max 10 pages
+      if (cursor > pageSize * 10) hasMore = false;
+    }
+
+    rawPoints.sort((a, b) => a.ts - b.ts);
+
+    if (rawPoints.length === 0) {
+      return res.json({ code: 0, data: { labels: [], values: [], stats: {} } });
+    }
+
+    // 按时间间隔聚合
+    const intervalMs = intervalMin * 60 * 1000;
+    const groups = {};
+    rawPoints.forEach(p => {
+      const bucket = Math.floor(p.ts.getTime() / intervalMs) * intervalMs;
+      if (!groups[bucket]) groups[bucket] = [];
+      groups[bucket].push(p.val);
+    });
+
+    const sortedBuckets = Object.keys(groups).map(Number).sort((a, b) => a - b);
+    const labels = [];
+    const values = [];
+
+    for (const bucket of sortedBuckets) {
+      const vals = groups[bucket];
+      let aggVal;
+      const bucketDate = new Date(bucket);
+
+      switch (algo) {
+        case 'raw':
+          // 原始数据：每个点单独显示
+          for (const v of vals) {
+            labels.push(fmt(bucketDate));
+            values.push(v);
+          }
+          continue;
+        case 'diff':
+          // 差值：当前值 - 前一个聚合值
+          aggVal = vals[vals.length - 1];
+          break;
+        case 'avg':
+          aggVal = vals.reduce((s, v) => s + v, 0) / vals.length;
+          break;
+        case 'max':
+          aggVal = Math.max(...vals);
+          break;
+        case 'min':
+          aggVal = Math.min(...vals);
+          break;
+        case 'latest':
+          aggVal = vals[vals.length - 1];
+          break;
+        case 'earliest':
+          aggVal = vals[0];
+          break;
+        case 'sum':
+          aggVal = vals.reduce((s, v) => s + v, 0);
+          break;
+        case 'count':
+          aggVal = vals.length;
+          break;
+        default:
+          aggVal = vals[vals.length - 1];
+      }
+
+      labels.push(fmt(bucketDate));
+      values.push(Math.round(aggVal * 100) / 100);
+    }
+
+    // diff算法特殊处理：计算相邻聚合值的差
+    if (algo === 'diff' && values.length > 1) {
+      for (let i = values.length - 1; i > 0; i--) {
+        values[i] = Math.round((values[i] - values[i - 1]) * 100) / 100;
+      }
+      values[0] = 0;
+    }
+
+    // 计算统计信息
+    const allVals = values.filter(v => v != null);
+    const stats = {
+      count: allVals.length,
+      avg: allVals.length ? parseFloat((allVals.reduce((s, v) => s + v, 0) / allVals.length).toFixed(2)) : 0,
+      max: allVals.length ? parseFloat(Math.max(...allVals).toFixed(2)) : 0,
+      min: allVals.length ? parseFloat(Math.min(...allVals).toFixed(2)) : 0,
+    };
+
+    res.json({ code: 0, data: { labels, values, stats, dataPoint: dp, algorithm: algo, interval: intervalMin } });
+  } catch (e) {
+    console.error('[History API] Error:', e.message);
+    res.json({ code: -1, msg: '获取历史数据失败: ' + e.message });
   }
 });
 
@@ -440,7 +525,7 @@ async function pollAndNotify() {
       return;
     }
 
-    const result = await apiRequest('GET', `/api/v1/device/dps?deviceId=${API_DEVICE}&pageSize=20`);
+    const result = await apiRequest('GET', `/api/v1/device/lastdps?deviceId=${API_DEVICE}`);
     if (result.code !== 0 || !result.data?.rows) return;
 
     const thresholds = {

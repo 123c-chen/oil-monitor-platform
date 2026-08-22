@@ -382,173 +382,236 @@ body {
    ============================================================ */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px 32px;
   margin-bottom: 28px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  justify-items: center;
 }
+
+/* Bottle-shaped card */
 .oil-card {
   position: relative;
-  height: 185px;
-  border-radius: var(--radius);
-  overflow: hidden;
+  width: 180px;
+  height: 240px;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-}
-/* Animated gradient border */
-.oil-card::before {
-  content: ''; position: absolute; inset: -1px;
-  border-radius: var(--radius);
-  background: linear-gradient(var(--card-border-angle, 0deg), var(--accent), transparent 40%, transparent 60%, var(--accent2));
-  z-index: -1; opacity: 0;
-  transition: opacity 0.4s;
-}
-.oil-card:hover::before {
-  opacity: 0.6;
-  animation: borderRotate 3s linear infinite;
-}
-@keyframes borderRotate {
-  from { --card-border-angle: 0deg; } to { --card-border-angle: 360deg; }
-}
-@property --card-border-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.oil-card::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.25) 100%);
-  z-index: 3; pointer-events: none;
 }
 .oil-card:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: var(--shadow-accent), var(--shadow), 0 0 60px var(--accent-dim);
-  border-color: var(--border-accent);
+  transform: translateY(-6px) scale(1.05);
 }
 
-/* Corner decorations */
-.corner-deco {
-  position: absolute; z-index: 5; pointer-events: none;
-  width: 12px; height: 12px;
-  opacity: 0; transition: opacity 0.4s;
-}
-.oil-card:hover .corner-deco { opacity: 1; }
-.corner-deco.tl { top: 6px; left: 6px; border-top: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
-.corner-deco.tr { top: 6px; right: 6px; border-top: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
-.corner-deco.bl { bottom: 6px; left: 6px; border-bottom: 1.5px solid var(--accent); border-left: 1.5px solid var(--accent); }
-.corner-deco.br { bottom: 6px; right: 6px; border-bottom: 1.5px solid var(--accent); border-right: 1.5px solid var(--accent); }
-
-/* Oil liquid container */
-.oil-liquid {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 65%; z-index: 1; overflow: hidden;
-}
-.oil-wave { position: absolute; bottom: 0; left: -50%; right: -50%; height: 100%; }
-.oil-wave svg { width: 200%; height: 100%; position: absolute; bottom: 0; }
-.oil-wave-1 { animation: waveSlosh 4s ease-in-out infinite; }
-.oil-wave-2 { animation: waveSlosh 5s ease-in-out infinite reverse; opacity: 0.5; }
-@keyframes waveSlosh {
-  0%, 100% { transform: translateX(0) translateY(0); }
-  25% { transform: translateX(-3%) translateY(-2%); }
-  50% { transform: translateX(0) translateY(-4%); }
-  75% { transform: translateX(3%) translateY(-2%); }
+/* Bottle body - rounded rectangle with very round corners */
+.bottle-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 40px 40px 36px 36px;
+  background: linear-gradient(180deg, rgba(15,20,35,0.95) 0%, rgba(10,15,30,0.98) 100%);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  box-shadow:
+    0 0 30px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
 }
 
-.oil-fill {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(180deg, var(--oil-color), var(--oil-color2));
-  transition: height 1s ease; z-index: 0;
+/* Glass reflection highlight */
+.bottle-body::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 12px;
+  width: 40px; height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent);
+  transform: rotate(-20deg);
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* Card content */
-.oil-card-content {
-  position: relative; z-index: 4;
+/* Dark ambient glow around bottle */
+.bottle-glow {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50px;
+  background: radial-gradient(ellipse at center, var(--bottle-glow-color, rgba(0,180,220,0.08)) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  transition: background 0.8s;
+}
+.oil-card:hover .bottle-glow {
+  background: radial-gradient(ellipse at center, var(--bottle-glow-color, rgba(0,180,220,0.15)) 0%, transparent 70%);
+}
+
+/* Liquid fill inside bottle */
+.bottle-liquid {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  border-radius: 0 0 36px 36px;
+  overflow: hidden;
+  z-index: 1;
+}
+.bottle-liquid-fill {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
   height: 100%;
-  display: flex; flex-direction: column;
+  background: linear-gradient(180deg, var(--liquid-top, rgba(0,180,220,0.25)), var(--liquid-bottom, rgba(0,120,180,0.4)));
+  transition: height 1s ease, background 1s ease;
+}
+
+/* Liquid surface wave */
+.bottle-liquid-fill::before {
+  content: '';
+  position: absolute;
+  top: -6px; left: -10%; right: -10%;
+  height: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12'%3E%3Cpath d='M0,6 C25,2 50,10 75,6 C100,2 125,10 150,6 C175,2 200,10 200,6 L200,12 L0,12 Z' fill='%23ffffff' opacity='0.08'/%3E%3C/svg%3E") repeat-x;
+  background-size: 200px 12px;
+  animation: liquidWave 3s ease-in-out infinite;
+}
+@keyframes liquidWave {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-50px); }
+}
+
+/* Particle animation container */
+.particle-field {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.float-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
+  box-shadow: 0 0 4px rgba(255,255,255,0.15);
+  animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { transform: translate(var(--drift-x, 10px), var(--drift-y, -30px)) rotate(360deg); opacity: 0; }
+}
+
+/* Temperature card special effects */
+.temp-bottle .bottle-liquid-fill {
+  background: linear-gradient(180deg, var(--temp-liquid-top, rgba(0,150,255,0.3)), var(--temp-liquid-bottom, rgba(0,100,200,0.5)));
+  transition: background 1.5s ease;
+}
+
+/* Bubbles for temperature */
+.temp-bubble-container {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+.temp-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), rgba(255,200,100,0.1));
+  border: 1px solid rgba(255,255,255,0.2);
+  animation: tempBubbleRise linear infinite;
+}
+@keyframes tempBubbleRise {
+  0% { transform: translateY(0) scale(1); opacity: 0.7; }
+  50% { transform: translateY(-50%) scale(1.15) translateX(4px); opacity: 0.5; }
+  100% { transform: translateY(-110%) scale(0.4) translateX(-2px); opacity: 0; }
+}
+
+/* Steam for high temperature */
+.steam-container {
+  position: absolute;
+  top: -15px; left: 10%; right: 10%;
+  height: 30px;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+.steam-puff {
+  position: absolute;
+  bottom: 0;
+  width: 10px; height: 10px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+  border-radius: 50%;
+  filter: blur(3px);
+  animation: steamFloat 2.5s ease-out infinite;
+}
+@keyframes steamFloat {
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-35px) scale(2.5); opacity: 0; }
+}
+
+/* Boiling shake animation */
+@keyframes boilShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-1px) translateY(0.5px); }
+  75% { transform: translateX(1px) translateY(-0.5px); }
+}
+.boiling .bottle-body {
+  animation: boilShake 0.15s ease-in-out infinite;
+}
+
+/* Card content overlay */
+.oil-card-content {
+  position: relative;
+  z-index: 8;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  padding: 14px;
+  padding: 16px 14px 14px;
 }
 .oil-card-label {
-  font-size: 10px; color: var(--text-secondary);
-  text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  text-align: center;
+}
+.oil-card-value-wrap {
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .oil-card-value {
   font-family: var(--font-mono);
-  font-size: 32px; font-weight: 700;
+  font-size: 36px;
+  font-weight: 700;
   color: var(--text-primary);
   text-shadow: 0 0 20px rgba(255,255,255,0.1);
   line-height: 1;
 }
-.oil-card-unit { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.oil-card-unit {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
 .oil-card-status {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: 6px;
-  font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+  display: block;
+  text-align: center;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0 auto;
+  width: fit-content;
 }
 .oil-card-status.good { color: var(--success); background: rgba(0,230,118,0.1); }
 .oil-card-status.warn { color: var(--warning); background: rgba(255,170,0,0.1); }
 .oil-card-status.bad { color: var(--danger); background: rgba(255,59,92,0.1); }
-
-/* Pulse ring on card value */
-.value-ring {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 60px; height: 60px; border-radius: 50%;
-  border: 1px solid var(--accent);
-  opacity: 0; z-index: 3; pointer-events: none;
-}
-.oil-card:hover .value-ring {
-  animation: ringPulse 1.5s ease-out infinite;
-}
-@keyframes ringPulse {
-  0% { width: 40px; height: 40px; opacity: 0.4; }
-  100% { width: 120px; height: 120px; opacity: 0; }
-}
-
-/* ============================================================
-   TEMPERATURE CARD (with boiling animation)
-   ============================================================ */
-.temp-card .oil-liquid { height: 70%; }
-.temp-card .oil-fill {
-  background: linear-gradient(180deg, var(--boil-color), rgba(200,60,0,0.2));
-}
-
-/* Bubbles */
-.bubble-container {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 100%; z-index: 2; overflow: hidden; pointer-events: none;
-}
-.bubble {
-  position: absolute; border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,200,100,0.1));
-  border: 1px solid rgba(255,255,255,0.15);
-  animation: bubbleRise linear infinite;
-}
-@keyframes bubbleRise {
-  0% { transform: translateY(0) scale(1); opacity: 0.8; }
-  50% { transform: translateY(-50%) scale(1.1) translateX(5px); opacity: 0.6; }
-  100% { transform: translateY(-120%) scale(0.5) translateX(-3px); opacity: 0; }
-}
-
-/* Steam */
-.steam-container {
-  position: absolute; top: -20px; left: 0; right: 0;
-  height: 40px; z-index: 5; overflow: visible; pointer-events: none;
-}
-.steam {
-  position: absolute; bottom: 0;
-  width: 8px; height: 8px;
-  background: var(--steam-color);
-  border-radius: 50%; filter: blur(4px);
-  animation: steamRise 2s ease-out infinite;
-}
-@keyframes steamRise {
-  0% { transform: translateY(0) scale(1); opacity: 0.6; }
-  100% { transform: translateY(-40px) scale(3); opacity: 0; }
-}
 
 /* ============================================================
    CHART PANELS
@@ -731,7 +794,7 @@ body {
 /* ============================================================
    TREND PAGE
    ============================================================ */
-.trend-controls { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.trend-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .trend-btn {
   padding: 8px 18px; border-radius: 8px;
   border: 1px solid var(--border);
@@ -743,6 +806,79 @@ body {
 }
 .trend-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
 .trend-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Trend advanced controls */
+.trend-advanced-controls {
+  display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px);
+}
+.trend-select-group { display: flex; flex-direction: column; gap: 4px; }
+.trend-select-label {
+  font-size: 10px; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.trend-select {
+  padding: 7px 28px 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: all 0.3s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.4)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  min-width: 120px;
+}
+.trend-select:hover { border-color: var(--border-accent); }
+.trend-select:focus { outline: none; border-color: var(--accent); }
+.trend-select option { background: #1a1f2e; color: #e0e0e0; }
+
+.trend-date-range { display: flex; align-items: center; gap: 6px; }
+.trend-date-sep { color: var(--text-secondary); font-size: 12px; }
+.trend-date-input {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 120px;
+}
+.trend-date-input:hover { border-color: var(--border-accent); }
+.trend-date-input:focus { outline: none; border-color: var(--accent); }
+.trend-date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
+.trend-fetch-btn {
+  padding: 7px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s;
+  font-family: var(--font-main);
+  white-space: nowrap;
+}
+.trend-fetch-btn:hover { background: var(--accent); color: #fff; }
+.trend-fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.chart-info {
+  font-size: 10px; color: var(--text-secondary);
+  display: flex; gap: 12px; align-items: center;
+}
 
 .trend-chart-panel {
   background: var(--bg-card);
@@ -758,7 +894,7 @@ body {
   background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
   opacity: 0.3;
 }
-.trend-chart-panel .chart-canvas-wrap { height: 300px; }
+.trend-chart-panel .chart-canvas-wrap { height: 380px; }
 
 .trend-stats {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -840,22 +976,6 @@ body {
 @keyframes breatheGlow {
   0%, 100% { filter: drop-shadow(0 0 2px var(--accent-dim)); }
   50% { filter: drop-shadow(0 0 8px var(--accent-glow)); }
-}
-
-/* Shimmer effect for cards */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.oil-card .shimmer-line {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  z-index: 5; pointer-events: none; overflow: hidden;
-}
-.oil-card .shimmer-line::after {
-  content: ''; position: absolute; top: 0; left: 0;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
-  animation: shimmer 4s ease-in-out infinite;
 }
 
 /* Scrollbar */
@@ -1447,26 +1567,89 @@ body {
       <div class="section-title" data-i18n="trendAnalysis">趋势分析</div>
     </div>
 
+    <!-- Quick range buttons -->
     <div class="trend-controls">
       <button class="trend-btn active" data-range="7" onclick="setTrendRange(7, this)" data-i18n="range7d">7天</button>
       <button class="trend-btn" data-range="14" onclick="setTrendRange(14, this)" data-i18n="range14d">14天</button>
       <button class="trend-btn" data-range="30" onclick="setTrendRange(30, this)" data-i18n="range30d">30天</button>
     </div>
 
-    <div class="trend-stats" id="trendStats"></div>
-
-    <div class="trend-chart-panel">
-      <div class="chart-header">
-        <div class="chart-title" data-i18n="particleFullTrend">颗粒度完整趋势</div>
+    <!-- Advanced controls row -->
+    <div class="trend-advanced-controls">
+      <div class="trend-select-group">
+        <label class="trend-select-label" data-i18n="dataPointLabel">数据指标</label>
+        <select id="trendDataPoint" class="trend-select" onchange="onTrendOptionChange()">
+          <option value="level1">等级1 (&gt;4μm)</option>
+          <option value="level2">等级2 (&gt;6μm)</option>
+          <option value="level3">等级3 (&gt;14μm)</option>
+          <option value="level4">等级4 (&gt;21μm)</option>
+          <option value="level5">等级5 (&gt;38μm)</option>
+          <option value="temperature">温度 (℃)</option>
+          <option value="waterContent">水含量 (ppm)</option>
+          <option value="waterActivity">水活性 (aw)</option>
+          <option value="all_particle" data-i18n-opt="allParticle">全部颗粒度</option>
+          <option value="all" data-i18n-opt="allData">全部指标</option>
+        </select>
       </div>
-      <div class="chart-canvas-wrap"><canvas id="trendParticleFull"></canvas></div>
+      <div class="trend-select-group">
+        <label class="trend-select-label" data-i18n="algorithmLabel">算法</label>
+        <select id="trendAlgorithm" class="trend-select" onchange="onTrendOptionChange()">
+          <option value="raw" data-i18n-opt="algoRaw">原始数据</option>
+          <option value="avg" data-i18n-opt="algoAvg">平均值</option>
+          <option value="max" data-i18n-opt="algoMax">最大值</option>
+          <option value="min" data-i18n-opt="algoMin">最小值</option>
+          <option value="diff" data-i18n-opt="algoDiff">差值</option>
+          <option value="latest" data-i18n-opt="algoLatest">最新值</option>
+          <option value="earliest" data-i18n-opt="algoEarliest">最早值</option>
+          <option value="sum" data-i18n-opt="algoSum">累计值</option>
+          <option value="count" data-i18n-opt="algoCount">计数</option>
+        </select>
+      </div>
+      <div class="trend-select-group">
+        <label class="trend-select-label" data-i18n="intervalLabel">时间间隔</label>
+        <select id="trendInterval" class="trend-select" onchange="onTrendOptionChange()">
+          <option value="5">5分钟</option>
+          <option value="15">15分钟</option>
+          <option value="30">30分钟</option>
+          <option value="60" selected>1小时</option>
+          <option value="180">3小时</option>
+          <option value="360">6小时</option>
+          <option value="720">12小时</option>
+          <option value="1440">1天</option>
+        </select>
+      </div>
+      <div class="trend-select-group">
+        <label class="trend-select-label" data-i18n="refLinesLabel">参考线</label>
+        <select id="trendRefLines" class="trend-select" onchange="onTrendOptionChange()">
+          <option value="none">无</option>
+          <option value="avg" selected data-i18n-opt="refAvg">平均值线</option>
+          <option value="maxmin" data-i18n-opt="refMaxMin">最大/最小值线</option>
+          <option value="all" data-i18n-opt="refAll">全部(均值+最大+最小)</option>
+          <option value="threshold" data-i18n-opt="refThresh">阈值线</option>
+        </select>
+      </div>
+      <div class="trend-select-group">
+        <label class="trend-select-label" data-i18n="dateRangeLabel">自定义日期</label>
+        <div class="trend-date-range">
+          <input type="date" id="trendStartDate" class="trend-date-input" onchange="onTrendOptionChange()">
+          <span class="trend-date-sep">~</span>
+          <input type="date" id="trendEndDate" class="trend-date-input" onchange="onTrendOptionChange()">
+        </div>
+      </div>
+      <div class="trend-select-group">
+        <button class="trend-fetch-btn" onclick="fetchTrendHistory()" data-i18n="fetchHistory">查询历史数据</button>
+      </div>
     </div>
 
+    <div class="trend-stats" id="trendStats"></div>
+
+    <!-- Dynamic chart area -->
     <div class="trend-chart-panel">
       <div class="chart-header">
-        <div class="chart-title" data-i18n="tempFullTrend">温度/水分完整趋势</div>
+        <div class="chart-title" id="trendChartTitle" data-i18n="particleFullTrend">颗粒度完整趋势</div>
+        <div class="chart-info" id="trendChartInfo"></div>
       </div>
-      <div class="chart-canvas-wrap"><canvas id="trendTempFull"></canvas></div>
+      <div class="chart-canvas-wrap"><canvas id="trendMainChart"></canvas></div>
     </div>
   </div>
 </div>
@@ -1725,7 +1908,11 @@ let state = {
   boilAnimEnabled: true,
   trendRange: 7,
   brightness: 100,
-  contrast: 100
+  contrast: 100,
+  // Trend history data from /api/history
+  trendHistory: null, // { labels, values, stats, dataPoint, algorithm, interval }
+  trendAnimProgress: 0,
+  trendAnimId: null
 };
 
 // ============================================================
@@ -1767,7 +1954,12 @@ const I18N = {
     alarmLevelWarn: '预警', alarmLevelCrit: '严重',
     alarmStatusPending: '待处理', alarmStatusConfirmed: '已确认', alarmStatusResolved: '已解决',
     deviceStatus: '设备状态', deviceOnline: '在线', deviceOffline: '离线', deviceAlarm: '报警中', deviceHealth: '健康',
-    trendWarnTitle: '趋势预警', trendWarnBadge: '连续7天上升', trendWarnFooter: '指标持续上升可能预示油液劣化加速，建议提前安排换油或检修'
+    trendWarnTitle: '趋势预警', trendWarnBadge: '连续7天上升', trendWarnFooter: '指标持续上升可能预示油液劣化加速，建议提前安排换油或检修',
+    dataPointLabel: '数据指标', algorithmLabel: '算法', intervalLabel: '时间间隔', refLinesLabel: '参考线', dateRangeLabel: '自定义日期', fetchHistory: '查询历史数据',
+    allParticle: '全部颗粒度', allData: '全部指标',
+    algoRaw: '原始数据', algoAvg: '平均值', algoMax: '最大值', algoMin: '最小值', algoDiff: '差值', algoLatest: '最新值', algoEarliest: '最早值', algoSum: '累计值', algoCount: '计数',
+    refAvg: '平均值线', refMaxMin: '最大/最小值线', refAll: '全部(均值+最大+最小)', refThresh: '阈值线',
+    chartDataCount: '数据点', chartAvg: '均值', chartMax: '最大', chartMin: '最小', chartLoading: '加载中...', chartNoData: '暂无数据，请点击查询'
   },
   en: {
     navTitle: 'Oil Intelligence Monitor', statusNormal: 'Normal', statusWarning: 'Warning', statusCritical: 'Critical',
@@ -1804,7 +1996,12 @@ const I18N = {
     alarmLevelWarn: 'Warning', alarmLevelCrit: 'Critical',
     alarmStatusPending: 'Pending', alarmStatusConfirmed: 'Confirmed', alarmStatusResolved: 'Resolved',
     deviceStatus: 'Device Status', deviceOnline: 'Online', deviceOffline: 'Offline', deviceAlarm: 'Alarming', deviceHealth: 'Healthy',
-    trendWarnTitle: 'Trend Warning', trendWarnBadge: '7-day rising', trendWarnFooter: 'Sustained rising trends may indicate accelerated oil degradation. Consider scheduling oil change or maintenance.'
+    trendWarnTitle: 'Trend Warning', trendWarnBadge: '7-day rising', trendWarnFooter: 'Sustained rising trends may indicate accelerated oil degradation. Consider scheduling oil change or maintenance.',
+    dataPointLabel: 'Data Point', algorithmLabel: 'Algorithm', intervalLabel: 'Interval', refLinesLabel: 'Ref. Lines', dateRangeLabel: 'Date Range', fetchHistory: 'Query History',
+    allParticle: 'All Particle', allData: 'All Metrics',
+    algoRaw: 'Raw', algoAvg: 'Average', algoMax: 'Maximum', algoMin: 'Minimum', algoDiff: 'Difference', algoLatest: 'Latest', algoEarliest: 'Earliest', algoSum: 'Sum', algoCount: 'Count',
+    refAvg: 'Average Line', refMaxMin: 'Max/Min Lines', refAll: 'All (Avg+Max+Min)', refThresh: 'Threshold Lines',
+    chartDataCount: 'Points', chartAvg: 'Avg', chartMax: 'Max', chartMin: 'Min', chartLoading: 'Loading...', chartNoData: 'No data, click Query to load'
   }
 };
 
@@ -1813,6 +2010,12 @@ function t(key) { return I18N[state.lang]?.[key] || I18N.zh[key] || key; }
 function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val) el.textContent = val;
+  });
+  // Handle select option translations
+  document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+    const key = el.getAttribute('data-i18n-opt');
     const val = t(key);
     if (val) el.textContent = val;
   });
@@ -1851,36 +2054,6 @@ async function apiFetchLatest() {
       temperature: m.d_6?.value, waterContent: m.d_7?.value, waterActivity: m.d_8?.value
     };
   } catch(e) { return null; }
-}
-
-// ============================================================
-// MOCK DATA
-// ============================================================
-function genMockHistory(days) {
-  const data = [];
-  const now = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now - i * 24 * 3600 * 1000);
-    const ts = d.toISOString().replace('T',' ').substring(0,19);
-    const base = 10 + Math.sin(i * 0.5) * 3;
-    // 最近7天温度和水分呈确定性上升趋势（用于演示趋势预警）
-    const dayIdx = days - 1 - i;
-    const inLast7 = dayIdx >= (days - 7);
-    const trendDay = inLast7 ? dayIdx - (days - 7) : -1;
-    data.push({
-      timestamp: ts,
-      level1: +(base + Math.random() * 4).toFixed(1),
-      level2: +(base - 1 + Math.random() * 3).toFixed(1),
-      level3: +(base - 2 + Math.random() * 3).toFixed(1),
-      level4: +(base - 3 + Math.random() * 2).toFixed(1),
-      level5: +(base - 4 + Math.random() * 2).toFixed(1),
-      temperature: inLast7 ? +(36 + trendDay * 1.2).toFixed(1) : +(35 + Math.sin(i * 0.3) * 5 + Math.random() * 3).toFixed(1),
-      waterContent: inLast7 ? +(90 + trendDay * 8).toFixed(1) : +(85 + Math.random() * 20).toFixed(1),
-      waterActivity: +(0.52 + Math.random() * 0.08).toFixed(2),
-      alarmLevel: 0
-    });
-  }
-  return data;
 }
 
 // ============================================================
@@ -1984,11 +2157,11 @@ function renderCards(data) {
   const grid = document.getElementById('cardsGrid');
   const T = CFG.thresholds;
   const items = [
-    { label: t('cardL1'), value: data.level1, unit: t('unitPc'), key: 'level1', threshold: T.particle.warning, critThreshold: T.particle.critical },
-    { label: t('cardL2'), value: data.level2, unit: t('unitPc'), key: 'level2', threshold: T.particle.warning, critThreshold: T.particle.critical },
-    { label: t('cardL3'), value: data.level3, unit: t('unitPc'), key: 'level3', threshold: T.particle.warning, critThreshold: T.particle.critical },
-    { label: t('cardL4'), value: data.level4, unit: t('unitPc'), key: 'level4', threshold: T.particle.warning, critThreshold: T.particle.critical },
-    { label: t('cardL5'), value: data.level5, unit: t('unitPc'), key: 'level5', threshold: T.particle.warning, critThreshold: T.particle.critical },
+    { label: t('cardL1'), value: data.level1, unit: t('unitPc'), key: 'level1', threshold: T.particle.warning, critThreshold: T.particle.critical, isParticle: true, particleLevel: 1 },
+    { label: t('cardL2'), value: data.level2, unit: t('unitPc'), key: 'level2', threshold: T.particle.warning, critThreshold: T.particle.critical, isParticle: true, particleLevel: 2 },
+    { label: t('cardL3'), value: data.level3, unit: t('unitPc'), key: 'level3', threshold: T.particle.warning, critThreshold: T.particle.critical, isParticle: true, particleLevel: 3 },
+    { label: t('cardL4'), value: data.level4, unit: t('unitPc'), key: 'level4', threshold: T.particle.warning, critThreshold: T.particle.critical, isParticle: true, particleLevel: 4 },
+    { label: t('cardL5'), value: data.level5, unit: t('unitPc'), key: 'level5', threshold: T.particle.warning, critThreshold: T.particle.critical, isParticle: true, particleLevel: 5 },
     { label: t('cardTemp'), value: data.temperature, unit: t('unitC'), key: 'temperature', threshold: T.temperature.highWarn, critThreshold: T.temperature.highCritical, isTemp: true },
     { label: t('cardWater'), value: data.waterContent, unit: t('unitPpm'), key: 'waterContent', threshold: T.waterContent.warning, critThreshold: T.waterContent.critical },
     { label: t('cardActivity'), value: data.waterActivity, unit: t('unitAw'), key: 'waterActivity', threshold: T.waterActivity.warning, critThreshold: T.waterActivity.critical },
@@ -2003,61 +2176,102 @@ function renderCards(data) {
     }
 
     const fillPercent = typeof val === 'number' ? Math.min((val / (item.critThreshold * 1.3)) * 100, 90) : 30;
-    const isTempCard = item.isTemp ? 'temp-card' : '';
 
-    // Bubbles for temp card
+    // --- Determine colors per card type ---
+    let glowColor, liquidTop, liquidBottom;
+    if (item.isTemp && typeof val === 'number') {
+      // Temperature: blue(20°C) → orange(50°C) → red(70°C+)
+      const tempRatio = Math.max(0, Math.min(1, (val - 20) / 50));
+      const r = Math.round(0 + tempRatio * 255);
+      const g = Math.round(150 - tempRatio * 120);
+      const b = Math.round(255 - tempRatio * 230);
+      liquidTop = `rgba(${r},${g},${b},0.3)`;
+      liquidBottom = `rgba(${r},${g},${b},0.55)`;
+      glowColor = `rgba(${r},${g},${b},0.12)`;
+    } else if (item.isParticle) {
+      liquidTop = 'rgba(0,180,220,0.2)';
+      liquidBottom = 'rgba(0,120,180,0.4)';
+      glowColor = 'rgba(0,180,220,0.1)';
+    } else if (item.key === 'waterContent') {
+      liquidTop = 'rgba(0,200,180,0.2)';
+      liquidBottom = 'rgba(0,150,140,0.4)';
+      glowColor = 'rgba(0,200,180,0.1)';
+    } else {
+      liquidTop = 'rgba(100,180,255,0.2)';
+      liquidBottom = 'rgba(60,130,220,0.4)';
+      glowColor = 'rgba(100,180,255,0.1)';
+    }
+
+    // --- Card class modifiers ---
+    let cardClass = 'oil-card';
+    if (item.isTemp) cardClass += ' temp-bottle';
+    if (item.isTemp && typeof val === 'number' && val >= 55) cardClass += ' boiling';
+
+    // --- Particle field (for particle level indicators) ---
+    let particleHtml = '';
+    if (item.isParticle && state.oilAnimEnabled) {
+      // Particle size scales with level: L1=small, L5=large
+      const sizeRanges = { 1: [2,3.5], 2: [3,4.5], 3: [4,5.5], 4: [5,7], 5: [7,10] };
+      const [minSz, maxSz] = sizeRanges[item.particleLevel] || [3, 5];
+      const particleCount = 12;
+      let particles = '';
+      for (let i = 0; i < particleCount; i++) {
+        const sz = minSz + Math.random() * (maxSz - minSz);
+        const left = 5 + Math.random() * 90;
+        const top = 10 + Math.random() * 80;
+        const dur = 3 + Math.random() * 5;
+        const delay = Math.random() * 6;
+        const driftX = -15 + Math.random() * 30;
+        const driftY = -20 - Math.random() * 25;
+        particles += `<div class="float-particle" style="width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;left:${left.toFixed(1)}%;top:${top.toFixed(1)}%;animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s;--drift-x:${driftX.toFixed(0)}px;--drift-y:${driftY.toFixed(0)}px"></div>`;
+      }
+      particleHtml = `<div class="particle-field">${particles}</div>`;
+    }
+
+    // --- Temperature bubbles + steam ---
     let bubblesHtml = '';
     let steamHtml = '';
     if (item.isTemp && state.boilAnimEnabled && typeof val === 'number') {
-      const intensity = Math.max(0, (val - 30) / 40);
-      const bubbleCount = Math.floor(intensity * 8) + 2;
-      bubblesHtml = '<div class="bubble-container">';
+      const intensity = Math.max(0, (val - 25) / 45);
+      const bubbleCount = Math.floor(intensity * 10) + 2;
+      let bubbles = '';
       for (let i = 0; i < bubbleCount; i++) {
-        const size = 3 + Math.random() * 6;
-        const left = 10 + Math.random() * 80;
-        const dur = 1.5 + Math.random() * 2;
+        const sz = 3 + Math.random() * 7;
+        const left = 8 + Math.random() * 84;
+        const bottom = Math.random() * 30;
+        const dur = 1.8 + Math.random() * 2.5;
         const delay = Math.random() * 3;
-        bubblesHtml += `<div class="bubble" style="width:${size}px;height:${size}px;left:${left}%;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
+        bubbles += `<div class="temp-bubble" style="width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;left:${left.toFixed(1)}%;bottom:${bottom.toFixed(1)}%;animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s"></div>`;
       }
-      bubblesHtml += '</div>';
+      bubblesHtml = `<div class="temp-bubble-container">${bubbles}</div>`;
 
-      if (val >= 45) {
-        const steamCount = Math.floor((val - 45) / 5) + 1;
-        steamHtml = '<div class="steam-container">';
+      if (val >= 40) {
+        const steamCount = Math.min(Math.floor((val - 40) / 5) + 2, 8);
+        let puffs = '';
         for (let i = 0; i < steamCount; i++) {
-          const left = 20 + Math.random() * 60;
-          const delay = Math.random() * 2;
-          steamHtml += `<div class="steam" style="left:${left}%;animation-delay:${delay}s"></div>`;
+          const left = 15 + Math.random() * 70;
+          const delay = Math.random() * 2.5;
+          const sz = 8 + Math.random() * 8;
+          puffs += `<div class="steam-puff" style="left:${left.toFixed(1)}%;animation-delay:${delay.toFixed(1)}s;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></div>`;
         }
-        steamHtml += '</div>';
+        steamHtml = `<div class="steam-container">${puffs}</div>`;
       }
     }
 
     return `
-      <div class="oil-card ${isTempCard} animate-in" style="animation-delay:${idx * 0.06}s">
-        <div class="corner-deco tl"></div><div class="corner-deco tr"></div>
-        <div class="corner-deco bl"></div><div class="corner-deco br"></div>
-        <div class="value-ring"></div>
-        <div class="shimmer-line"></div>
-        <div class="oil-fill" style="height:${fillPercent}%"></div>
-        ${state.oilAnimEnabled ? `
-        <div class="oil-liquid">
-          <div class="oil-wave oil-wave-1">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-              <path d="M0,60 C150,20 350,100 600,60 C850,20 1050,100 1200,60 L1200,120 L0,120 Z" fill="var(--oil-color)"/>
-            </svg>
+      <div class="${cardClass} animate-in" style="animation-delay:${idx * 0.06}s;--bottle-glow-color:${glowColor}">
+        <div class="bottle-glow"></div>
+        <div class="bottle-body">
+          <div class="bottle-liquid">
+            <div class="bottle-liquid-fill" style="height:${fillPercent.toFixed(0)}%;--liquid-top:${liquidTop};--liquid-bottom:${liquidBottom}"></div>
           </div>
-          <div class="oil-wave oil-wave-2">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-              <path d="M0,80 C200,40 400,100 600,70 C800,40 1000,90 1200,60 L1200,120 L0,120 Z" fill="var(--oil-color2)"/>
-            </svg>
-          </div>
-        </div>` : ''}
-        ${bubblesHtml}
-        ${steamHtml}
+          ${particleHtml}
+          ${bubblesHtml}
+          ${steamHtml}
+        </div>
         <div class="oil-card-content">
           <div class="oil-card-label">${item.label}</div>
-          <div>
+          <div class="oil-card-value-wrap">
             <div class="oil-card-value">${val}</div>
             <div class="oil-card-unit">${item.unit}</div>
           </div>
@@ -2276,37 +2490,14 @@ function drawDashboardCharts() {
 }
 
 function drawTrendCharts() {
-  const range = state.trendRange;
-  const data = state.historyData.slice(-range);
-  if (data.length < 2) return;
-  const labels = data.map(d => d.timestamp.substring(5, 10));
-  const T = CFG.thresholds;
-
-  drawChart('trendParticleFull', [
-    { label: 'L1', data: data.map(d => d.level1), color: '#e74c3c', fill: true, lineWidth: 2 },
-    { label: 'L2', data: data.map(d => d.level2), color: '#e67e22', lineWidth: 2 },
-    { label: 'L3', data: data.map(d => d.level3), color: '#f1c40f', lineWidth: 2 },
-    { label: 'L4', data: data.map(d => d.level4), color: '#2ecc71', lineWidth: 2 },
-    { label: 'L5', data: data.map(d => d.level5), color: '#3498db', lineWidth: 2 },
-  ], labels, {
-    thresholds: [
-      { value: T.particle.warning, color: 'rgba(255,170,0,0.6)' },
-      { value: T.particle.critical, color: 'rgba(255,59,92,0.6)' }
-    ]
-  });
-
-  drawChart('trendTempFull', [
-    { label: state.lang === 'zh' ? '油温℃' : 'Temp℃', data: data.map(d => d.temperature), color: '#e74c3c', fill: true, lineWidth: 2 },
-    { label: state.lang === 'zh' ? '水含量ppm' : 'Water ppm', data: data.map(d => d.waterContent), color: '#3498db', lineWidth: 2 },
-    { label: state.lang === 'zh' ? '水活性aw' : 'Activity', data: data.map(d => d.waterActivity), color: '#9b59b6', lineWidth: 1.5, alpha: 0.7 },
-  ], labels, {
-    rightPad: 45,
-    thresholds: [
-      { value: T.temperature.highWarn, color: 'rgba(255,170,0,0.5)' }
-    ]
-  });
-
-  renderTrendStats(data);
+  // If we have trend history data loaded, re-render it
+  if (state.trendHistory) {
+    if (state.trendHistory.multiSeries) {
+      renderTrendChartMulti();
+    } else {
+      renderTrendChartSingle(1);
+    }
+  }
 }
 
 function renderTrendStats(data) {
@@ -2417,13 +2608,45 @@ function switchPage(pageId, tabEl) {
   if (tabEl) tabEl.classList.add('active');
 
   if (pageId === 'pageTrend') {
-    setTimeout(() => drawTrendCharts(), 100);
+    setTimeout(() => {
+      if (!state.trendHistory) {
+        fetchTrendHistory();
+      } else {
+        drawTrendCharts();
+      }
+    }, 100);
   }
   if (pageId === 'pageAlarms') {
-    setTimeout(() => {
+    setTimeout(async () => {
       renderOverviewRings();
       if (!allAlarms.length) {
-        allAlarms = genMockAlarms();
+        try {
+          const r = await fetch('/api/alarms');
+          const d = await r.json();
+          if (d.code === 0 && d.data && d.data.length > 0) {
+            // 将服务端分组报警展平为单行格式
+            const unitMap = { particle: '个/mL', temperature: '℃', water: 'ppm', activity: 'aw' };
+            const typeLabelMap = { particle: 'alarmTypeParticle', temperature: 'alarmTypeTemp', water: 'alarmTypeWater', activity: 'alarmTypeWater' };
+            const statusList = ['pending', 'confirmed', 'resolved'];
+            d.data.forEach((alarm, ai) => {
+              if (alarm.types && alarm.types.length > 0) {
+                alarm.types.forEach((tp, ti) => {
+                  allAlarms.push({
+                    id: ai * 100 + ti + 1,
+                    time: alarm.timestamp,
+                    type: tp.type,
+                    typeLabel: typeLabelMap[tp.type] || 'alarmTypeParticle',
+                    level: tp.level || alarm.level,
+                    value: parseFloat(tp.value).toFixed(1) + ' ' + (unitMap[tp.type] || ''),
+                    status: 'pending',
+                    date: new Date(alarm.timestamp.replace(' ', 'T'))
+                  });
+                });
+              }
+            });
+            allAlarms.sort((a, b) => b.date - a.date);
+          }
+        } catch(e) { console.warn('获取报警数据失败:', e); }
       }
       filterAlarms();
     }, 100);
@@ -2434,7 +2657,508 @@ function setTrendRange(days, btn) {
   state.trendRange = days;
   document.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  drawTrendCharts();
+  // Update date inputs to reflect range
+  const end = new Date();
+  const start = new Date(Date.now() - days * 24 * 3600 * 1000);
+  document.getElementById('trendStartDate').value = start.toISOString().substring(0, 10);
+  document.getElementById('trendEndDate').value = end.toISOString().substring(0, 10);
+  fetchTrendHistory();
+}
+
+// ============================================================
+// TREND HISTORY FETCH & CONTROLS
+// ============================================================
+const DATA_POINT_COLORS = {
+  level1: '#e74c3c', level2: '#e67e22', level3: '#f1c40f',
+  level4: '#2ecc71', level5: '#3498db',
+  temperature: '#e74c3c', waterContent: '#3498db', waterActivity: '#9b59b6'
+};
+const DATA_POINT_NAMES = {
+  level1: 'L1(>4μm)', level2: 'L2(>6μm)', level3: 'L3(>14μm)',
+  level4: 'L4(>21μm)', level5: 'L5(>38μm)',
+  temperature: '温度(℃)', waterContent: '水含量(ppm)', waterActivity: '水活性(aw)'
+};
+
+async function fetchTrendHistory() {
+  const btn = document.querySelector('.trend-fetch-btn');
+  if (btn) { btn.disabled = true; btn.textContent = t('chartLoading'); }
+
+  const dp = document.getElementById('trendDataPoint').value;
+  const algo = document.getElementById('trendAlgorithm').value;
+  const interval = document.getElementById('trendInterval').value;
+  const startDate = document.getElementById('trendStartDate').value;
+  const endDate = document.getElementById('trendEndDate').value;
+
+  // For multi-series (all_particle / all), we fetch each data point separately
+  if (dp === 'all_particle' || dp === 'all') {
+    const keys = dp === 'all_particle'
+      ? ['level1','level2','level3','level4','level5']
+      : ['level1','level2','level3','level4','level5','temperature','waterContent','waterActivity'];
+    const results = {};
+    try {
+      await Promise.all(keys.map(async k => {
+        const params = new URLSearchParams({ dataPoint: k, algorithm: algo, interval });
+        if (startDate) params.append('start', startDate + 'T00:00:00');
+        if (endDate) params.append('end', endDate + 'T23:59:59');
+        const resp = await fetch('/api/history?' + params.toString());
+        const json = await resp.json();
+        if (json.code === 0 && json.data) results[k] = json.data;
+      }));
+
+      // Merge labels from first available result
+      const firstKey = Object.keys(results)[0];
+      if (!firstKey) {
+        state.trendHistory = null;
+        renderTrendChartEmpty();
+        return;
+      }
+      const labels = results[firstKey].labels;
+      const multiSeries = {};
+      const allStats = {};
+      keys.forEach(k => {
+        if (results[k]) {
+          multiSeries[k] = results[k].values;
+          allStats[k] = results[k].stats;
+        }
+      });
+
+      state.trendHistory = { labels, multiSeries, allStats, dataPoint: dp, algorithm: algo, interval };
+      renderTrendChartMulti();
+      updateTrendInfo(labels.length, allStats);
+    } catch(e) {
+      console.error('[Trend] Fetch error:', e);
+      state.trendHistory = null;
+      renderTrendChartEmpty();
+    }
+  } else {
+    // Single data point
+    try {
+      const params = new URLSearchParams({ dataPoint: dp, algorithm: algo, interval });
+      if (startDate) params.append('start', startDate + 'T00:00:00');
+      if (endDate) params.append('end', endDate + 'T23:59:59');
+      const resp = await fetch('/api/history?' + params.toString());
+      const json = await resp.json();
+      if (json.code === 0 && json.data) {
+        state.trendHistory = { labels: json.data.labels, values: json.data.values, stats: json.data.stats, dataPoint: dp, algorithm: algo, interval };
+        startTrendAnimation();
+        updateTrendStats(json.data.stats);
+        updateTrendInfo(json.data.labels.length, { [dp]: json.data.stats });
+      } else {
+        state.trendHistory = null;
+        renderTrendChartEmpty();
+      }
+    } catch(e) {
+      console.error('[Trend] Fetch error:', e);
+      state.trendHistory = null;
+      renderTrendChartEmpty();
+    }
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = t('fetchHistory'); }
+}
+
+function onTrendOptionChange() {
+  // Auto-fetch when any option changes
+  fetchTrendHistory();
+}
+
+function renderTrendChartEmpty() {
+  const canvas = document.getElementById('trendMainChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(t('chartNoData'), rect.width / 2, rect.height / 2);
+}
+
+function updateTrendInfo(count, statsMap) {
+  const info = document.getElementById('trendChartInfo');
+  if (!info) return;
+  const algo = document.getElementById('trendAlgorithm').value;
+  const interval = document.getElementById('trendInterval').value;
+  const algoName = t('algo' + algo.charAt(0).toUpperCase() + algo.slice(1));
+  let html = `<span>${t('chartDataCount')}: ${count}</span>`;
+  html += `<span>${t('intervalLabel')}: ${interval}min</span>`;
+  if (statsMap) {
+    const firstKey = Object.keys(statsMap)[0];
+    if (firstKey && statsMap[firstKey]) {
+      const s = statsMap[firstKey];
+      if (s.avg != null) html += `<span>${t('chartAvg')}: ${s.avg.toFixed(2)}</span>`;
+      if (s.max != null) html += `<span>${t('chartMax')}: ${s.max.toFixed(2)}</span>`;
+      if (s.min != null) html += `<span>${t('chartMin')}: ${s.min.toFixed(2)}</span>`;
+    }
+  }
+  info.innerHTML = html;
+}
+
+function updateTrendStats(stats) {
+  const container = document.getElementById('trendStats');
+  if (!stats || !container) return;
+  const items = [
+    { label: t('chartDataCount'), value: stats.count || 0, sub: '' },
+    { label: t('chartAvg'), value: stats.avg?.toFixed(2) || '--', sub: '' },
+    { label: t('chartMax'), value: stats.max?.toFixed(2) || '--', sub: '' },
+    { label: t('chartMin'), value: stats.min?.toFixed(2) || '--', sub: '' },
+  ];
+  container.innerHTML = items.map(s => `
+    <div class="trend-stat-card">
+      <div class="trend-stat-label">${s.label}</div>
+      <div class="trend-stat-value">${s.value}</div>
+      <div class="trend-stat-sub">${s.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// TREND CHART ANIMATION (right-extending)
+// ============================================================
+function startTrendAnimation() {
+  if (state.trendAnimId) cancelAnimationFrame(state.trendAnimId);
+  state.trendAnimProgress = 0;
+  const duration = 1200; // ms
+  const startTime = performance.now();
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    state.trendAnimProgress = Math.min(elapsed / duration, 1);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - state.trendAnimProgress, 3);
+    renderTrendChartSingle(eased);
+    if (state.trendAnimProgress < 1) {
+      state.trendAnimId = requestAnimationFrame(animate);
+    }
+  }
+  state.trendAnimId = requestAnimationFrame(animate);
+}
+
+// ============================================================
+// RENDER SINGLE-SERIES TREND CHART
+// ============================================================
+function renderTrendChartSingle(progress = 1) {
+  const h = state.trendHistory;
+  if (!h || !h.labels || !h.values) return;
+
+  const canvas = document.getElementById('trendMainChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 24, right: 24, bottom: 32, left: 48 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  const vals = h.values;
+  const labels = h.labels;
+  const n = vals.length;
+  if (n === 0) return;
+
+  // Compute visible count based on animation progress
+  const visibleCount = Math.max(1, Math.ceil(n * progress));
+
+  const validVals = vals.filter(v => v != null && v >= 0);
+  if (validVals.length === 0) return;
+  let maxV = Math.max(...validVals) * 1.15;
+  let minV = Math.min(0, Math.min(...validVals) * 0.9);
+
+  const xStep = cW / Math.max(n - 1, 1);
+  const dp = h.dataPoint;
+  const color = DATA_POINT_COLORS[dp] || '#00d4ff';
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.top + cH * (1 - i / 5);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '10px monospace'; ctx.textAlign = 'right';
+    ctx.fillText((minV + (maxV - minV) * i / 5).toFixed(1), pad.left - 6, y + 3);
+  }
+
+  // Reference lines
+  drawRefLines(ctx, h.stats, minV, maxV, pad, cW, cH, dp);
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + cH);
+  grad.addColorStop(0, hexToRgba(color, 0.18));
+  grad.addColorStop(1, hexToRgba(color, 0.0));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  let started = false;
+  let lastX = pad.left;
+  for (let i = 0; i < visibleCount; i++) {
+    if (vals[i] == null) continue;
+    const x = pad.left + i * xStep;
+    const y = pad.top + cH * (1 - (vals[i] - minV) / (maxV - minV));
+    if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    lastX = x;
+  }
+  ctx.lineTo(lastX, pad.top + cH);
+  ctx.lineTo(pad.left, pad.top + cH);
+  ctx.closePath();
+  ctx.globalAlpha = 0.5;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Data line
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  started = false;
+  for (let i = 0; i < visibleCount; i++) {
+    if (vals[i] == null) continue;
+    const x = pad.left + i * xStep;
+    const y = pad.top + cH * (1 - (vals[i] - minV) / (maxV - minV));
+    if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Glow on leading edge
+  if (progress < 1 && visibleCount > 0) {
+    const edgeIdx = visibleCount - 1;
+    if (vals[edgeIdx] != null) {
+      const ex = pad.left + edgeIdx * xStep;
+      const ey = pad.top + cH * (1 - (vals[edgeIdx] - minV) / (maxV - minV));
+      const glowGrad = ctx.createRadialGradient(ex, ey, 0, ex, ey, 12);
+      glowGrad.addColorStop(0, hexToRgba(color, 0.6));
+      glowGrad.addColorStop(1, hexToRgba(color, 0));
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath(); ctx.arc(ex, ey, 12, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // Points (only when not too many)
+  if (n <= 100) {
+    for (let i = 0; i < visibleCount; i++) {
+      if (vals[i] == null) continue;
+      const x = pad.left + i * xStep;
+      const y = pad.top + cH * (1 - (vals[i] - minV) / (maxV - minV));
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.15;
+      ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // X labels
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '9px monospace'; ctx.textAlign = 'center';
+  const labelStep = Math.max(1, Math.floor(n / 8));
+  for (let i = 0; i < n; i++) {
+    if (i % labelStep === 0 || i === n - 1) {
+      ctx.fillText(labels[i], pad.left + i * xStep, H - 8);
+    }
+  }
+
+  // Chart title update
+  const titleEl = document.getElementById('trendChartTitle');
+  if (titleEl) {
+    const dpName = DATA_POINT_NAMES[dp] || dp;
+    const algoNames = { raw: '原始', avg: '均值', max: '最大', min: '最小', diff: '差值', latest: '最新', earliest: '最早', sum: '累计', count: '计数' };
+    titleEl.textContent = `${dpName} ${algoNames[h.algorithm] || ''} 趋势`;
+  }
+
+  // Store for tooltip
+  chartMeta['trendMainChart'] = { datasets: [{ data: vals, color, label: DATA_POINT_NAMES[dp] }], xLabels: labels, pad, cW, cH, W, H, minV, maxV, xStep };
+}
+
+// ============================================================
+// RENDER MULTI-SERIES TREND CHART
+// ============================================================
+function renderTrendChartMulti() {
+  const h = state.trendHistory;
+  if (!h || !h.multiSeries) return;
+
+  const canvas = document.getElementById('trendMainChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 24, right: 24, bottom: 32, left: 48 };
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+
+  const labels = h.labels;
+  const keys = Object.keys(h.multiSeries);
+  const n = labels.length;
+  if (n === 0 || keys.length === 0) return;
+
+  // Compute global min/max
+  let allVals = [];
+  keys.forEach(k => h.multiSeries[k].forEach(v => { if (v != null) allVals.push(v); }));
+  if (allVals.length === 0) return;
+  let maxV = Math.max(...allVals) * 1.15;
+  let minV = Math.min(0, Math.min(...allVals) * 0.9);
+
+  const xStep = cW / Math.max(n - 1, 1);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.top + cH * (1 - i / 5);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '10px monospace'; ctx.textAlign = 'right';
+    ctx.fillText((minV + (maxV - minV) * i / 5).toFixed(1), pad.left - 6, y + 3);
+  }
+
+  // Reference lines (use first key's stats)
+  const firstStats = h.allStats[keys[0]];
+  drawRefLines(ctx, firstStats, minV, maxV, pad, cW, cH, keys[0]);
+
+  // Draw each series
+  keys.forEach((k, ki) => {
+    const vals = h.multiSeries[k];
+    const color = DATA_POINT_COLORS[k] || '#00d4ff';
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    let started = false;
+    vals.forEach((v, i) => {
+      if (v == null) return;
+      const x = pad.left + i * xStep;
+      const y = pad.top + cH * (1 - (v - minV) / (maxV - minV));
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Points (only when not too many)
+    if (n <= 80) {
+      vals.forEach((v, i) => {
+        if (v == null) return;
+        const x = pad.left + i * xStep;
+        const y = pad.top + cH * (1 - (v - minV) / (maxV - minV));
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
+  });
+
+  // X labels
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '9px monospace'; ctx.textAlign = 'center';
+  const labelStep = Math.max(1, Math.floor(n / 8));
+  for (let i = 0; i < n; i++) {
+    if (i % labelStep === 0 || i === n - 1) {
+      ctx.fillText(labels[i], pad.left + i * xStep, H - 8);
+    }
+  }
+
+  // Legend
+  let lx = pad.left;
+  keys.forEach(k => {
+    const color = DATA_POINT_COLORS[k] || '#00d4ff';
+    const name = DATA_POINT_NAMES[k] || k;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(lx, 8, 10, 3);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '9px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(name, lx + 14, 12);
+    lx += ctx.measureText(name).width + 30;
+  });
+
+  // Chart title
+  const titleEl = document.getElementById('trendChartTitle');
+  if (titleEl) {
+    titleEl.textContent = h.dataPoint === 'all_particle' ? '全部颗粒度趋势' : '全部指标趋势';
+  }
+
+  // Store for tooltip
+  const datasets = keys.map(k => ({ data: h.multiSeries[k], color: DATA_POINT_COLORS[k], label: DATA_POINT_NAMES[k] }));
+  chartMeta['trendMainChart'] = { datasets, xLabels: labels, pad, cW, cH, W, H, minV, maxV, xStep };
+}
+
+// ============================================================
+// REFERENCE LINES HELPER
+// ============================================================
+function drawRefLines(ctx, stats, minV, maxV, pad, cW, cH, dp) {
+  if (!stats) return;
+  const refMode = document.getElementById('trendRefLines')?.value || 'avg';
+  const range = maxV - minV;
+  if (range === 0) return;
+
+  const drawHLine = (value, color, label, dash) => {
+    const y = pad.top + cH * (1 - (value - minV) / range);
+    if (y < pad.top - 5 || y > pad.top + cH + 5) return;
+    ctx.save();
+    ctx.setLineDash(dash || [6, 4]);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.setLineDash([]);
+    // Label
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = color;
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${label}: ${value.toFixed(2)}`, pad.left + cW - 80, y - 4);
+    ctx.restore();
+  };
+
+  if (refMode === 'avg' || refMode === 'all') {
+    if (stats.avg != null) drawHLine(stats.avg, '#f39c12', t('chartAvg'), [6, 4]);
+  }
+  if (refMode === 'maxmin' || refMode === 'all') {
+    if (stats.max != null) drawHLine(stats.max, '#e74c3c', t('chartMax'), [3, 3]);
+    if (stats.min != null) drawHLine(stats.min, '#3498db', t('chartMin'), [3, 3]);
+  }
+  if (refMode === 'threshold') {
+    const T = CFG.thresholds;
+    const thMap = {
+      level1: [{ v: T.particle.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.particle.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }],
+      level2: [{ v: T.particle.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.particle.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }],
+      level3: [{ v: T.particle.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.particle.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }],
+      level4: [{ v: T.particle.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.particle.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }],
+      level5: [{ v: T.particle.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.particle.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }],
+      temperature: [{ v: T.temperature.highWarn, c: 'rgba(255,170,0,0.8)', l: '高温预警' }, { v: T.temperature.highCritical, c: 'rgba(255,59,92,0.8)', l: '高温严重' }],
+      waterContent: [{ v: T.waterContent.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.waterContent.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }],
+      waterActivity: [{ v: T.waterActivity.warning, c: 'rgba(255,170,0,0.8)', l: '预警' }, { v: T.waterActivity.critical, c: 'rgba(255,59,92,0.8)', l: '严重' }]
+    };
+    const ths = thMap[dp] || [];
+    ths.forEach(th => drawHLine(th.v, th.c, th.l, [4, 4]));
+  }
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 // ============================================================
@@ -2508,8 +3232,10 @@ async function refreshData() {
       if (state.historyData.length > 60) state.historyData.shift();
     }
   } else if (!state.currentData) {
-    state.historyData = genMockHistory(14);
-    state.currentData = { ...state.historyData[state.historyData.length - 1] };
+    // API不可用时显示无数据，不使用模拟数据
+    renderCards({ level1: null });
+    document.getElementById('dataTimeLabel').textContent = t('noData');
+    return;
   }
 
   const alarm = checkAlarm(state.currentData);
@@ -2586,7 +3312,7 @@ function hideChartTooltip() {
 }
 
 function initChartTooltips() {
-  const canvasIds = ['chartParticle', 'chartTemp', 'trendParticleFull', 'trendTempFull'];
+  const canvasIds = ['chartParticle', 'chartTemp', 'trendMainChart'];
   canvasIds.forEach(id => {
     const canvas = document.getElementById(id);
     if (!canvas) return;
@@ -2697,36 +3423,6 @@ let allAlarms = [];
 let filteredAlarms = [];
 let alarmPage = 1;
 const ALARMS_PER_PAGE = 10;
-
-function genMockAlarms() {
-  const alarms = [];
-  const now = new Date();
-  const types = ['particle', 'temperature', 'water'];
-  const statuses = ['pending', 'confirmed', 'resolved'];
-  const typeLabels = { particle: 'alarmTypeParticle', temperature: 'alarmTypeTemp', water: 'alarmTypeWater' };
-
-  for (let i = 0; i < 35; i++) {
-    const d = new Date(now - Math.random() * 30 * 24 * 3600 * 1000);
-    const type = types[Math.floor(Math.random() * types.length)];
-    const level = Math.random() > 0.4 ? 1 : 2;
-    let value = '';
-    if (type === 'particle') value = (15 + Math.random() * 15).toFixed(1) + ' pcs/mL';
-    else if (type === 'temperature') value = (50 + Math.random() * 20).toFixed(1) + ' ℃';
-    else value = (120 + Math.random() * 200).toFixed(1) + ' ppm';
-
-    alarms.push({
-      id: i + 1,
-      time: d.toISOString().replace('T', ' ').substring(0, 19),
-      type, typeLabel: typeLabels[type],
-      level,
-      value,
-      status: statuses[Math.floor(Math.random() * (level === 2 ? 2 : 3))],
-      date: d
-    });
-  }
-  alarms.sort((a, b) => b.date - a.date);
-  return alarms;
-}
 
 function filterAlarms() {
   const type = document.getElementById('alarmFilterType').value;
@@ -2861,11 +3557,17 @@ async function init() {
   updateClock();
   setInterval(updateClock, 1000);
 
-  state.historyData = genMockHistory(14);
-  state.currentData = { ...state.historyData[state.historyData.length - 1] };
+  state.historyData = [];
+  state.currentData = null;
 
   await refreshData();
   initChartTooltips();
+
+  // Set default date range for trend controls
+  const now = new Date();
+  const weekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+  document.getElementById('trendEndDate').value = now.toISOString().substring(0, 10);
+  document.getElementById('trendStartDate').value = weekAgo.toISOString().substring(0, 10);
 
   window.addEventListener('resize', () => {
     drawDashboardCharts();
