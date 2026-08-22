@@ -290,6 +290,19 @@ app.get('/api/history', async (req, res) => {
 
     const fmt = d => d.toISOString().replace('T', ' ').substring(0, 19);
 
+    // 各数据点的合理值范围（用于过滤传感器通信错误产生的异常数据）
+    const VALID_RANGES = {
+      level1:        { min: 0, max: 100 },
+      level2:        { min: 0, max: 100 },
+      level3:        { min: 0, max: 100 },
+      level4:        { min: 0, max: 100 },
+      level5:        { min: 0, max: 100 },
+      temperature:   { min: -40, max: 200 },
+      waterContent:  { min: 0, max: 100 },
+      waterActivity: { min: 0, max: 1 },
+    };
+    const range = VALID_RANGES[dp] || { min: -1e9, max: 1e9 };
+
     // 数据点名称→ds_id映射
     const DP_TO_DSID = {
       level1: '361240', level2: '361241', level3: '361242',
@@ -301,8 +314,9 @@ app.get('/api/history', async (req, res) => {
     // 从MDS获取历史数据（支持cursor分页）
     const rawPoints = [];
     let cursor = 0;
-    const pageSize = 2000;
+    const pageSize = 1000; // MDS API实际每页最多返回1000条
     let hasMore = true;
+    let filteredCount = 0;
 
     while (hasMore) {
       const hisUrl = `/api/v1/device/hisdps?pid=${API_GROUP_PID}&did=${API_DEVICE}&sdid=${API_SDID}&dsids=${dsid}&start=${fmt(startDate)}&end=${fmt(endDate)}&order=asc&cursor=${cursor}`;
@@ -316,21 +330,29 @@ app.get('/api/history', async (req, res) => {
         for (const dpItem of (ds.dps || [])) {
           const ts = new Date(parseInt(dpItem.at) * 1000);
           const val = parseFloat(dpItem.value);
-          if (!isNaN(val) && val >= 0) {
+          if (!isNaN(val) && val >= range.min && val <= range.max) {
             rawPoints.push({ ts, val });
+          } else if (!isNaN(val)) {
+            filteredCount++;
           }
         }
       }
 
-      // Check if there are more pages
-      if (result.data.cursor && result.data.cursor > 0 && result.data.dss[0]?.dps?.length >= pageSize) {
-        cursor = result.data.cursor;
+      // 分页：API实际返回条数 < pageSize 时说明已到最后一页
+      const actualCount = result.data.dss[0]?.dps?.length || 0;
+      const nextCursor = result.data.cursor;
+      if (nextCursor && nextCursor > 0 && actualCount > 0) {
+        cursor = nextCursor;
       } else {
         hasMore = false;
       }
 
-      // Safety limit: max 10 pages
-      if (cursor > pageSize * 10) hasMore = false;
+      // 安全限制：最多20页
+      if (cursor > pageSize * 20) hasMore = false;
+    }
+
+    if (filteredCount > 0) {
+      console.log(`[History] 已过滤 ${filteredCount} 条异常数据（超出合理范围 ${range.min}~${range.max}）`);
     }
 
     rawPoints.sort((a, b) => a.ts - b.ts);
