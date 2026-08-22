@@ -229,6 +229,65 @@ class CloudClient:
             print(f"[API] 获取数据异常: {e}")
             return None
 
+    def fetch_history(self, page_size=100, max_pages=10):
+        """
+        获取历史数据点（分页）
+        返回: list of record dicts, 每个包含 timestamp, level1-5, temperature, water_content, water_activity
+        """
+        all_rows = []
+        page = 1
+        for _ in range(max_pages):
+            try:
+                r = self.session.get(
+                    f"{CONFIG['api_base']}/device/dps",
+                    params={"deviceId": CONFIG["device_id"], "pageSize": page_size, "page": page},
+                    verify=False, timeout=15)
+                data = r.json()
+                if data.get("code") != 0 or not data.get("data", {}).get("rows"):
+                    break
+                rows = data["data"]["rows"]
+                all_rows.extend(rows)
+                # 如果返回数量小于pageSize，说明没有更多数据了
+                if len(rows) < page_size:
+                    break
+                page += 1
+                time.sleep(0.3)  # 避免请求过快
+            except Exception as e:
+                print(f"[API] 获取历史数据异常(第{page}页): {e}")
+                break
+
+        records = []
+        for row in all_rows:
+            dp_map = {}
+            for dp in row.get("lastdp", []):
+                dp_map[dp["name"]] = {
+                    "value": dp.get("value"),
+                    "at": dp.get("at", ""),
+                }
+            ts = dp_map.get("d_1", {}).get("at") or row.get("createTime", "")
+            if not ts:
+                continue
+            # 统一时间格式
+            try:
+                if "T" in ts:
+                    ts = ts.replace("T", " ").split(".")[0]
+                else:
+                    ts = ts.split(".")[0]
+            except:
+                pass
+            records.append({
+                "timestamp": ts,
+                "level1": dp_map.get("d_1", {}).get("value"),
+                "level2": dp_map.get("d_2", {}).get("value"),
+                "level3": dp_map.get("d_3", {}).get("value"),
+                "level4": dp_map.get("d_4", {}).get("value"),
+                "level5": dp_map.get("d_5", {}).get("value"),
+                "temperature": dp_map.get("d_6", {}).get("value"),
+                "water_content": dp_map.get("d_7", {}).get("value"),
+                "water_activity": dp_map.get("d_8", {}).get("value"),
+            })
+        return records
+
 
 # ============================================================
 # 智能报警引擎
@@ -914,10 +973,62 @@ def build_report_message(conn, period="周"):
 
 
 # ============================================================
+# 开机补采（填补电脑关机期间缺失的数据）
+# ============================================================
+def backfill_missing_data(conn, client, alarm_engine):
+    """
+    检查数据库中最后一条记录的时间，从云平台拉取历史数据补填空缺。
+    适用于电脑关机/断网后重新开机时自动补采。
+    """
+    c = conn.cursor()
+    # 获取数据库中最新一条记录的时间
+    c.execute('SELECT MAX(timestamp) FROM sensor_data')
+    last_ts = c.fetchone()[0]
+
+    if not last_ts:
+        print("[补采] 数据库为空，无需补采")
+        return 0
+
+    print(f"[补采] 数据库最新记录: {last_ts}")
+
+    # 从云平台获取历史数据
+    history = client.fetch_history(page_size=100, max_pages=10)
+    if not history:
+        print("[补采] 未获取到历史数据")
+        return 0
+
+    # 过滤出比数据库最新记录更新的数据
+    new_records = [r for r in history if r["timestamp"] > last_ts]
+    if not new_records:
+        print("[补采] 没有缺失数据")
+        return 0
+
+    print(f"[补采] 发现 {len(new_records)} 条缺失数据，开始补填...")
+
+    saved_count = 0
+    alarm_count = 0
+    for record in new_records:
+        # 对补采数据也执行报警检查
+        level, messages = alarm_engine.check(record)
+        if save_record(conn, record, level, "; ".join(messages)):
+            saved_count += 1
+            if level > 0:
+                alarm_count += 1
+                # 补采期间的报警也推送
+                if CONFIG["wecom_webhook"]:
+                    msg = build_alarm_message(record, level, messages)
+                    if msg:
+                        wecom_send_markdown(CONFIG["wecom_webhook"], msg)
+
+    print(f"[补采] 完成: 补填 {saved_count} 条数据，其中 {alarm_count} 条有报警")
+    return saved_count
+
+
+# ============================================================
 # 主流程
 # ============================================================
 def run_once():
-    """执行一次数据采集+报警检查"""
+    """执行一次数据采集+报警检查（启动时自动补采缺失数据）"""
     conn = init_db()
     client = CloudClient()
     alarm_engine = AlarmEngine(conn)
@@ -927,7 +1038,10 @@ def run_once():
         print("[主流程] 登录失败")
         return None, 0, []
 
-    # 获取数据
+    # 开机补采：填补关机期间缺失的历史数据
+    backfill_missing_data(conn, client, alarm_engine)
+
+    # 获取最新数据
     record = client.fetch_latest()
     if not record:
         print("[主流程] 获取数据失败")
@@ -954,13 +1068,16 @@ def run_once():
 
 
 def run_report(period="周"):
-    """生成并推送定期报告（生成前先采集一次最新数据入库）"""
+    """生成并推送定期报告（生成前先补采缺失数据，再采集一次最新数据入库）"""
     conn = init_db()
 
     # 先采集一次最新数据
     client = CloudClient()
     alarm_engine = AlarmEngine(conn)
     if client.login():
+        # 开机补采：填补关机期间缺失的历史数据
+        backfill_missing_data(conn, client, alarm_engine)
+
         record = client.fetch_latest()
         if record:
             alarm_level, messages = alarm_engine.check(record)
@@ -999,7 +1116,7 @@ def run_report(period="周"):
 
 
 def run_daily_dashboard():
-    """执行每日看板：采集数据 + 生成看板图 + 输出文本摘要"""
+    """执行每日看板：补采缺失数据 + 采集最新数据 + 生成看板图 + 输出文本摘要"""
     conn = init_db()
     client = CloudClient()
     alarm_engine = AlarmEngine(conn)
@@ -1009,6 +1126,9 @@ def run_daily_dashboard():
         print("[每日看板] 登录失败")
         conn.close()
         return None, None
+
+    # 开机补采：填补关机期间缺失的历史数据
+    backfill_missing_data(conn, client, alarm_engine)
 
     record = client.fetch_latest()
     if not record:
